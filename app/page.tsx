@@ -225,7 +225,7 @@ function SignedInContent() {
         className={`
         fixed left-0 top-0 h-full z-40 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0 md:static md:z-10
+        md:translate-x-0 md:static md:z-10 md:sticky md:top-0 md:h-screen
       `}
       >
         <Sidebar
@@ -245,7 +245,7 @@ function SignedInContent() {
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-8 pt-16 md:pt-8">
+      <div className="flex-1 p-8 pt-16 md:pt-8 md:overflow-y-auto">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}

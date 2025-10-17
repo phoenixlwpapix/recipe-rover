@@ -20,8 +20,22 @@ function IngredientsPanel({
   loading,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
-  const [newIngredientCategory, setNewIngredientCategory] = useState("蔬菜");
+  const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
   const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const cuisines = [
+    "中国菜",
+    "法国菜",
+    "意大利菜",
+    "日本菜",
+    "东南亚菜",
+    "希腊菜",
+    "美国菜",
+    "墨西哥菜",
+    "韩国菜",
+    "印度菜",
+  ];
 
   const categoryColors: Record<string, string> = {
     肉类: "bg-red-100",
@@ -42,43 +56,6 @@ function IngredientsPanel({
 
   const ingredients = ingredientsData?.ingredients || [];
 
-  // 添加默认食材
-  useEffect(() => {
-    if (!ingredientsLoading && user?.id) {
-      addDefaultIngredients();
-    }
-  }, [ingredientsLoading, user?.id, ingredients.length]);
-
-  const addDefaultIngredients = async () => {
-    if (!user?.id || ingredients.length > 0) return;
-    const defaultIngredients = [
-      { name: "盐", category: "调料" },
-      { name: "糖", category: "调料" },
-      { name: "油", category: "调料" },
-      { name: "葱", category: "蔬菜" },
-      { name: "姜", category: "蔬菜" },
-      { name: "大蒜", category: "蔬菜" },
-      { name: "鸡蛋", category: "蛋白质" },
-      { name: "牛奶", category: "乳制品" },
-      { name: "鸡肉", category: "肉类" },
-      { name: "猪肉", category: "肉类" },
-      { name: "牛肉", category: "肉类" },
-    ];
-    try {
-      await db.transact(
-        defaultIngredients.map((ing) =>
-          db.tx.ingredients[id()].update({
-            ...ing,
-            userId: db.useUser().id,
-            createdAt: Date.now(),
-          })
-        )
-      );
-    } catch (error) {
-      console.error("添加默认食材失败:", error);
-    }
-  };
-
   const handleAddIngredient = async () => {
     if (!newIngredient.trim() || !user?.id) return;
     try {
@@ -91,6 +68,7 @@ function IngredientsPanel({
         })
       );
       setNewIngredient("");
+      setShowAddForm(false);
     } catch (error) {
       console.error("添加食材失败:", error);
       alert("添加食材失败");
@@ -100,14 +78,16 @@ function IngredientsPanel({
   return (
     <>
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-black mb-2">我的配料表</h2>
-        <p className="text-gray-700">从你的配料表中选择食材，生成美味食谱。</p>
+        <h2 className="text-3xl font-bold text-black mb-2">我的食材库</h2>
+        <p className="text-gray-700">从个人食材库中选择材料，生成美味食谱。</p>
       </div>
 
       {/* 配料表 */}
       <div className="mb-8">
         {ingredientsLoading ? (
           <div>加载中...</div>
+        ) : ingredients.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">这里空空如也...</div>
         ) : (
           <div className="space-y-4 mb-4">
             {["肉类", "蔬菜", "蛋白质", "乳制品", "调料", "其他"].map(
@@ -163,33 +143,56 @@ function IngredientsPanel({
         )}
 
         {/* 添加新食材 */}
-        <div className="flex gap-2 mb-4">
-          <input
-            type="text"
-            value={newIngredient}
-            onChange={(e) => setNewIngredient(e.target.value)}
-            placeholder="食材名称..."
-            className="flex-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-            onKeyDown={(e) => e.key === "Enter" && handleAddIngredient()}
-          />
-          <select
-            value={newIngredientCategory}
-            onChange={(e) => setNewIngredientCategory(e.target.value)}
-            className="border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          >
-            <option value="肉类">肉类</option>
-            <option value="蔬菜">蔬菜</option>
-            <option value="蛋白质">蛋白质</option>
-            <option value="乳制品">乳制品</option>
-            <option value="调料">调料</option>
-            <option value="其他">其他</option>
-          </select>
-          <button
-            onClick={handleAddIngredient}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          >
-            添加
-          </button>
+        <div className="mb-4">
+          {!showAddForm ? (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              添加食材
+            </button>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={newIngredient}
+                onChange={(e) => setNewIngredient(e.target.value)}
+                placeholder="食材名称..."
+                className="flex-1 border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                onKeyDown={(e) => e.key === "Enter" && handleAddIngredient()}
+                autoFocus
+              />
+              <div className="flex gap-2">
+                <select
+                  value={newIngredientCategory}
+                  onChange={(e) => setNewIngredientCategory(e.target.value)}
+                  className="border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                >
+                  <option value="肉类">肉类</option>
+                  <option value="蔬菜">蔬菜</option>
+                  <option value="蛋白质">蛋白质</option>
+                  <option value="乳制品">乳制品</option>
+                  <option value="调料">调料</option>
+                  <option value="其他">其他</option>
+                </select>
+                <button
+                  onClick={handleAddIngredient}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 whitespace-nowrap"
+                >
+                  添加
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewIngredient("");
+                  }}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 whitespace-nowrap"
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 选中的食材 */}
@@ -214,22 +217,21 @@ function IngredientsPanel({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             选择菜系：
           </label>
-          <select
-            value={selectedCuisine}
-            onChange={(e) => setSelectedCuisine(e.target.value)}
-            className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
-          >
-            <option value="中国菜">中国菜</option>
-            <option value="法国菜">法国菜</option>
-            <option value="意大利菜">意大利菜</option>
-            <option value="日本菜">日本菜</option>
-            <option value="东南亚菜">东南亚菜</option>
-            <option value="希腊菜">希腊菜</option>
-            <option value="美国菜">美国菜</option>
-            <option value="墨西哥菜">墨西哥菜</option>
-            <option value="韩国菜">韩国菜</option>
-            <option value="印度菜">印度菜</option>
-          </select>
+          <div className="flex flex-wrap gap-2">
+            {cuisines.map((cuisine) => (
+              <button
+                key={cuisine}
+                onClick={() => setSelectedCuisine(cuisine)}
+                className={`px-3 py-2 rounded-md border text-sm ${
+                  selectedCuisine === cuisine
+                    ? "bg-blue-100 border-blue-500 text-blue-800"
+                    : "bg-white border-gray-300 hover:bg-gray-50 text-black"
+                }`}
+              >
+                {cuisine}
+              </button>
+            ))}
+          </div>
         </div>
 
         <button
@@ -237,7 +239,7 @@ function IngredientsPanel({
           disabled={loading || selectedIngredients.length === 0}
           className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 font-medium disabled:opacity-50"
         >
-          {loading ? "生成中..." : "生成食谱"}
+          {loading ? "生成中..." : "生成菜谱"}
         </button>
       </div>
     </>

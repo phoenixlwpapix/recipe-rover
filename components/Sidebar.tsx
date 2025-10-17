@@ -41,7 +41,7 @@ function Sidebar({
                 : "text-gray-700 hover:bg-gray-100"
             }`}
           >
-            我的配料表
+            我的食材库
           </button>
           <div className="relative">
             <button
