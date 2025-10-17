@@ -9,6 +9,8 @@ interface IngredientsPanelProps {
   onDeleteIngredient: (ingredientId: string, ingredientName: string) => void;
   onGenerateRecipe: () => void;
   loading: boolean;
+  selectedCuisine: string;
+  onCuisineChange: (cuisine: string) => void;
 }
 
 function IngredientsPanel({
@@ -18,10 +20,11 @@ function IngredientsPanel({
   onDeleteIngredient,
   onGenerateRecipe,
   loading,
+  selectedCuisine,
+  onCuisineChange,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
-  const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
   const [showAddForm, setShowAddForm] = useState(false);
 
   const cuisines = [
@@ -221,7 +224,7 @@ function IngredientsPanel({
             {cuisines.map((cuisine) => (
               <button
                 key={cuisine}
-                onClick={() => setSelectedCuisine(cuisine)}
+                onClick={() => onCuisineChange(cuisine)}
                 className={`px-3 py-2 rounded-md border text-sm ${
                   selectedCuisine === cuisine
                     ? "bg-blue-100 border-blue-500 text-blue-800"

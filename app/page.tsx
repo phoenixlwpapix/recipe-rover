@@ -21,6 +21,7 @@ function SignedInContent() {
   const [loading, setLoading] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -85,10 +86,10 @@ function SignedInContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ingredients: selectedIngredients,
-          cuisine: "中国菜",
-          prompt: `使用这些食材生成一个中国菜风格的详细食谱：${selectedIngredients.join(
+          cuisine: selectedCuisine,
+          prompt: `你是一位享誉全球的世界美食大厨，对各种食材和全球菜系都有精秒深入的理解，请使用这些食材生成一个${selectedCuisine}风格的详细食谱：${selectedIngredients.join(
             ", "
-          )}。请根据中国菜的烹饪特点和风味来设计食谱，不要加入任何拼音或英文。格式如下：
+          )}。请根据${selectedCuisine}的烹饪特点和风味来设计食谱，整个菜谱中不要加入任何拼音或英文。格式如下：
 **标题：** [食谱标题]
 **Ingredients:**
 - [材料1]
@@ -254,6 +255,8 @@ function SignedInContent() {
             onDeleteIngredient={deleteIngredient}
             onGenerateRecipe={generateRecipe}
             loading={loading}
+            selectedCuisine={selectedCuisine}
+            onCuisineChange={setSelectedCuisine}
           />
         ) : selectedRecipe ? (
           <RecipeDisplay recipe={selectedRecipe} />
