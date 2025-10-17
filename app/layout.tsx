@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Recipe Rover",
+  title: "食旅星球 Recipe Rover",
   description: "AI生成的全球美食食谱",
 };
 

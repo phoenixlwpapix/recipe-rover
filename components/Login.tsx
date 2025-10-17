@@ -37,10 +37,10 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-2xl font-bold text-center text-black">
-        登录 Recipe Rover
+        登录食旅星球
       </h2>
       <p className="text-gray-700 text-center text-sm">
-        输入邮箱，我们发送验证码（无账户自动创建）。
+        输入邮箱，我们发送验证码（无账户将自动创建）。
       </p>
       <input
         ref={inputRef}
