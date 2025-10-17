@@ -18,25 +18,27 @@ export function parseRecipe(text: string): ParsedRecipe {
     text.match(/\*\*材料[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*步骤[:：]\*\*|$)/i) ||
     text.match(/材料[:：]\s*\n?([\s\S]*?)(?=步骤[:：]|$)/i) ||
     text.match(
-      /\*\*Ingredients[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*Method[:：]\*\*|$)/i
+      /\*\*Ingredients[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*步骤[:：]\*\*|$)/i
     ) ||
-    text.match(/Ingredients[:：]\s*\n?([\s\S]*?)(?=Method[:：]|$)/i);
+    text.match(/Ingredients[:：]\s*\n?([\s\S]*?)(?=步骤[:：]|$)/i);
   const ingredients = ingredientsSection ? ingredientsSection[1].trim() : "";
 
   // 提取步骤部分 (Method)
   const instructionsSection =
-    text.match(/\*\*步骤[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*Tips[:：]?\*\*|$)/i) ||
-    text.match(/步骤[:：]\s*\n?([\s\S]*?)(?=Tips[:：]?|$)/i) ||
     text.match(
-      /\*\*Method[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*Tips[:：]?\*\*|$)/i
+      /\*\*步骤[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*小贴士[:：]?\*\*|$)/i
     ) ||
-    text.match(/Method[:：]\s*\n?([\s\S]*?)(?=Tips[:：]?|$)/i);
+    text.match(/步骤[:：]\s*\n?([\s\S]*?)(?=小贴士[:：]?|$)/i) ||
+    text.match(
+      /\*\*Method[:：]\*\*\s*\n?([\s\S]*?)(?=\*\*小贴士[:：]?\*\*|$)/i
+    ) ||
+    text.match(/Method[:：]\s*\n?([\s\S]*?)(?=小贴士[:：]?|$)/i);
   const instructions = instructionsSection ? instructionsSection[1].trim() : "";
 
   // 提取Tips部分
   const tipsSection =
-    text.match(/\*\*Tips[:：]?\*\*\s*\n?([\s\S]*?)(?=---|$)/i) ||
-    text.match(/Tips[:：]?\s*\n?([\s\S]*?)(?=---|$)/i);
+    text.match(/\*\*小贴士[:：]?\*\*\s*\n?([\s\S]*?)(?=---|$)/i) ||
+    text.match(/小贴士[:：]?\s*\n?([\s\S]*?)(?=---|$)/i);
   const tips = tipsSection ? tipsSection[1].trim() : "";
 
   const result = { title, ingredients, instructions, tips };
