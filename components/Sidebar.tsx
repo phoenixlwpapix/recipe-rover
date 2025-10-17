@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { db } from "../db/instant";
 import FavoritesList from "./FavoritesList";
+import Image from "next/image";
 
 interface SidebarProps {
   activeTab: "ingredients" | "favorites";
@@ -22,7 +23,13 @@ function Sidebar({
     <div className="w-64 bg-white shadow-lg h-screen flex flex-col">
       <div className="p-6">
         <div className="flex items-center mb-8">
-          <img src="/logo.png" alt="食旅星球" className="w-8 h-8 mr-3" />
+          <Image
+            src="/logo.png"
+            alt="食旅星球"
+            width={32}
+            height={32}
+            className="mr-3"
+          />
           <h1 className="text-2xl font-bold text-black">食旅星球</h1>
         </div>
         <nav className="space-y-2">
@@ -71,7 +78,6 @@ function Sidebar({
                   userId={user?.id || ""}
                   onRecipeClick={(recipeText) => {
                     onRecipeClick(recipeText);
-                    setFavoritesExpanded(false);
                   }}
                   onDeleteFavorite={onDeleteFavorite}
                 />

@@ -23,6 +23,15 @@ function IngredientsPanel({
   const [newIngredientCategory, setNewIngredientCategory] = useState("蔬菜");
   const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
 
+  const categoryColors: Record<string, string> = {
+    肉类: "bg-red-100",
+    蔬菜: "bg-green-100",
+    蛋白质: "bg-yellow-100",
+    乳制品: "bg-blue-100",
+    调料: "bg-purple-100",
+    其他: "bg-gray-100",
+  };
+
   const user = db.useUser();
 
   const { data: ingredientsData, isLoading: ingredientsLoading } = db.useQuery({
@@ -108,10 +117,15 @@ function IngredientsPanel({
                 );
                 if (categoryIngredients.length === 0) return null;
                 return (
-                  <div key={category} className="flex items-start gap-4 mb-4">
-                    <h3 className="text-lg font-semibold text-black whitespace-nowrap min-w-0 flex-shrink-0">
+                  <div key={category} className="flex items-center gap-4 mb-4">
+                    <button
+                      className={`text-lg font-semibold text-black whitespace-nowrap min-w-0 flex-shrink-0 px-3 py-2 rounded-md ${
+                        categoryColors[category] || "bg-gray-100"
+                      }`}
+                      onClick={() => {}}
+                    >
                       {category}
-                    </h3>
+                    </button>
                     <div className="flex flex-wrap gap-2 flex-1">
                       {categoryIngredients.map((ing) => (
                         <div key={ing.id} className="relative">

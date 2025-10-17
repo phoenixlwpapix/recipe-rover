@@ -215,7 +215,7 @@ function SignedInContent() {
       {/* 移动端遮罩 */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -232,7 +232,9 @@ function SignedInContent() {
           activeTab={activeTab}
           onTabChange={(tab) => {
             setActiveTab(tab);
-            setIsMobileMenuOpen(false); // 移动端切换标签后关闭菜单
+            if (tab === "ingredients") {
+              setIsMobileMenuOpen(false); // 移动端切换到配料表时关闭菜单
+            }
           }}
           onRecipeClick={(recipeText: string) => {
             setSelectedRecipe(recipeText);
@@ -243,7 +245,7 @@ function SignedInContent() {
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 md:ml-64 p-8 pt-16 md:pt-8">
+      <div className="flex-1 p-8 pt-16 md:pt-8">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}
