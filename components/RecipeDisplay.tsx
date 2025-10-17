@@ -3,10 +3,9 @@ import { parseRecipe } from "../utils/recipeParser";
 
 interface RecipeDisplayProps {
   recipe: string;
-  onAddToFavorites: () => void;
 }
 
-function RecipeDisplay({ recipe, onAddToFavorites }: RecipeDisplayProps) {
+function RecipeDisplay({ recipe }: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
 
   return (
@@ -18,7 +17,7 @@ function RecipeDisplay({ recipe, onAddToFavorites }: RecipeDisplayProps) {
         {/* Ingredients 左栏 */}
         <div>
           <h3 className="text-xl font-semibold text-black mb-4 border-b pb-2">
-            Ingredients
+            配料清单
           </h3>
           <div className="text-gray-700 leading-relaxed">
             <ReactMarkdown
@@ -44,7 +43,7 @@ function RecipeDisplay({ recipe, onAddToFavorites }: RecipeDisplayProps) {
         {/* Method 右栏 */}
         <div>
           <h3 className="text-xl font-semibold text-black mb-4 border-b pb-2">
-            Method
+            制作方法
           </h3>
           <div className="text-gray-700 leading-relaxed">
             <ReactMarkdown
@@ -72,7 +71,7 @@ function RecipeDisplay({ recipe, onAddToFavorites }: RecipeDisplayProps) {
       {parsedRecipe.tips && (
         <div className="mt-8">
           <h3 className="text-xl font-semibold text-black mb-4 border-b pb-2">
-            Tips
+            小贴士：
           </h3>
           <div className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg">
             <ReactMarkdown
@@ -95,13 +94,6 @@ function RecipeDisplay({ recipe, onAddToFavorites }: RecipeDisplayProps) {
           </div>
         </div>
       )}
-
-      <button
-        onClick={onAddToFavorites}
-        className="mt-6 bg-yellow-500 text-white px-6 py-3 rounded-md hover:bg-yellow-600 font-medium transition-colors"
-      >
-        收藏食谱
-      </button>
     </div>
   );
 }

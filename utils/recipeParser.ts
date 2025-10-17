@@ -11,7 +11,7 @@ export function parseRecipe(text: string): ParsedRecipe {
   // 使用正则表达式更灵活地解析
   const titleMatch =
     text.match(/\*\*标题[:：]\*\*\s*(.+)/i) || text.match(/标题[:：]\s*(.+)/i);
-  const title = titleMatch ? titleMatch[1].trim() : "";
+  const title = titleMatch ? titleMatch[1].trim().replace(/\*/g, "") : "";
 
   // 提取材料部分 (Ingredients)
   const ingredientsSection =
@@ -35,8 +35,8 @@ export function parseRecipe(text: string): ParsedRecipe {
 
   // 提取Tips部分
   const tipsSection =
-    text.match(/\*\*Tips[:：]?\*\*\s*\n?([\s\S]*)/i) ||
-    text.match(/Tips[:：]?\s*\n?([\s\S]*)/i);
+    text.match(/\*\*Tips[:：]?\*\*\s*\n?([\s\S]*?)(?=---|$)/i) ||
+    text.match(/Tips[:：]?\s*\n?([\s\S]*?)(?=---|$)/i);
   const tips = tipsSection ? tipsSection[1].trim() : "";
 
   const result = { title, ingredients, instructions, tips };

@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { db } from "../db/instant"; // 相对路径，从 app 到根 db
 import { id } from "@instantdb/react";
 import Login from "../components/Login"; // 从 app 到根 components
-import FavoritesList from "../components/FavoritesList";
 import RecipeDisplay from "../components/RecipeDisplay";
+import RecipeSkeleton from "../components/RecipeSkeleton";
 import IngredientsPanel from "../components/IngredientsPanel";
+import Sidebar from "../components/Sidebar";
 import ConfirmModal from "../components/ConfirmModal";
 import { parseRecipe } from "../utils/recipeParser";
 
@@ -19,6 +20,7 @@ function SignedInContent() {
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -86,7 +88,7 @@ function SignedInContent() {
           cuisine: "中国菜",
           prompt: `使用这些食材生成一个中国菜风格的详细食谱：${selectedIngredients.join(
             ", "
-          )}。请根据中国菜的烹饪特点和风味来设计食谱。格式如下：
+          )}。请根据中国菜的烹饪特点和风味来设计食谱，不要加入任何拼音或英文。格式如下：
 **标题：** [食谱标题]
 **Ingredients:**
 - [材料1]
@@ -107,7 +109,7 @@ function SignedInContent() {
         // TODO: 实现保存食谱逻辑
         console.log("食谱生成成功:", data.recipe);
       } else {
-        alert("生成失败");
+        alert("生成失败: " + (data.error || "未知错误"));
       }
     } catch (error) {
       alert("错误：" + error);
@@ -130,16 +132,21 @@ function SignedInContent() {
     try {
       const parsedRecipe = parseRecipe(recipe);
       const favoriteId = id();
+      const recipeId = id();
       await db.transact([
-        db.tx.favorites[favoriteId].update({
-          user: user.id,
-          recipe: {
-            title: parsedRecipe.title,
-            ingredients: parsedRecipe.ingredients,
-            instructions: parsedRecipe.instructions,
-            tips: parsedRecipe.tips,
-          },
+        db.tx.recipes[recipeId].update({
+          title: parsedRecipe.title,
+          ingredients: parsedRecipe.ingredients,
+          instructions: parsedRecipe.instructions,
+          tips: parsedRecipe.tips,
+          userId: user.id,
+          createdAt: Date.now(),
         }),
+        db.tx.favorites[favoriteId].update({
+          createdAt: Date.now(),
+        }),
+        db.tx.favorites[favoriteId].link({ user: user.id }),
+        db.tx.favorites[favoriteId].link({ recipe: recipeId }),
       ]);
       alert("收藏成功！");
       console.log("食谱收藏成功");
@@ -179,45 +186,64 @@ function SignedInContent() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* 左侧栏 */}
-      <div className="w-64 bg-white shadow-lg">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-black mb-8">Recipe Rover</h1>
-          <nav className="space-y-2">
-            <button
-              onClick={() => setActiveTab("ingredients")}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                activeTab === "ingredients"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              我的配料表
-            </button>
-            <button
-              onClick={() => setActiveTab("favorites")}
-              className={`w-full text-left px-4 py-3 rounded-md font-medium ${
-                activeTab === "favorites"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              我的收藏
-            </button>
-          </nav>
-        </div>
-        <div className="p-6 border-t">
-          <button
-            onClick={() => db.auth.signOut()}
-            className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+      {/* 移动端汉堡菜单按钮 */}
+      <div className="md:hidden fixed top-4 left-4 z-20">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 bg-white rounded-md shadow-lg"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
           >
-            登出
-          </button>
-        </div>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={
+                isMobileMenuOpen
+                  ? "M6 18L18 6M6 6l12 12"
+                  : "M4 6h16M4 12h16M4 18h16"
+              }
+            />
+          </svg>
+        </button>
+      </div>
+
+      {/* 移动端遮罩 */}
+      {isMobileMenuOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* 左侧栏 - 桌面端固定，移动端抽屉 */}
+      <div
+        className={`
+        fixed left-0 top-0 h-full z-40 transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0 md:static md:z-10
+      `}
+      >
+        <Sidebar
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            setIsMobileMenuOpen(false); // 移动端切换标签后关闭菜单
+          }}
+          onRecipeClick={(recipeText: string) => {
+            setSelectedRecipe(recipeText);
+            setIsMobileMenuOpen(false); // 移动端选择食谱后关闭菜单
+          }}
+          onDeleteFavorite={deleteFavorite}
+        />
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-8">
+      <div className="flex-1 md:ml-64 p-8 pt-16 md:pt-8">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}
@@ -227,18 +253,28 @@ function SignedInContent() {
             onGenerateRecipe={generateRecipe}
             loading={loading}
           />
+        ) : selectedRecipe ? (
+          <RecipeDisplay recipe={selectedRecipe} />
         ) : (
-          <FavoritesList
-            userId={user.id}
-            onRecipeClick={(recipeText) => setSelectedRecipe(recipeText)}
-            onDeleteFavorite={deleteFavorite}
-          />
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">
+              请从左侧选择一个收藏的食谱查看详情
+            </p>
+          </div>
         )}
-        {recipe && activeTab === "ingredients" && (
-          <RecipeDisplay recipe={recipe} onAddToFavorites={addToFavorites} />
-        )}
-        {selectedRecipe && activeTab === "favorites" && (
-          <RecipeDisplay recipe={selectedRecipe} onAddToFavorites={() => {}} />
+        {loading && activeTab === "ingredients" && <RecipeSkeleton />}
+        {recipe && !loading && activeTab === "ingredients" && (
+          <div>
+            <RecipeDisplay recipe={recipe} />
+            <div className="mt-4 text-center">
+              <button
+                onClick={addToFavorites}
+                className="bg-yellow-500 text-white px-6 py-3 rounded-md hover:bg-yellow-600 font-medium transition-colors"
+              >
+                收藏食谱
+              </button>
+            </div>
+          </div>
         )}
       </div>
 

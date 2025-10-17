@@ -100,39 +100,39 @@ function IngredientsPanel({
         {ingredientsLoading ? (
           <div>加载中...</div>
         ) : (
-          <div className="space-y-6 mb-4">
-            {["蔬菜", "调料", "蛋白质", "乳制品", "肉类", "其他"].map(
+          <div className="space-y-4 mb-4">
+            {["肉类", "蔬菜", "蛋白质", "乳制品", "调料", "其他"].map(
               (category) => {
                 const categoryIngredients = ingredients.filter(
-                  (ing: any) => ing.category === category
+                  (ing) => ing.category === category
                 );
                 if (categoryIngredients.length === 0) return null;
                 return (
-                  <div key={category}>
-                    <h3 className="text-lg font-semibold text-black mb-3">
+                  <div key={category} className="flex items-start gap-4 mb-4">
+                    <h3 className="text-lg font-semibold text-black whitespace-nowrap min-w-0 flex-shrink-0">
                       {category}
                     </h3>
-                    <div className="flex flex-wrap gap-3">
-                      {categoryIngredients.map((ing: any) => (
+                    <div className="flex flex-wrap gap-2 flex-1">
+                      {categoryIngredients.map((ing) => (
                         <div key={ing.id} className="relative">
                           <button
                             onClick={() => onToggleIngredient(ing.name)}
-                            className={`inline-block p-3 rounded-md border text-left ${
+                            className={`inline-block px-3 py-2 rounded-md border text-sm ${
                               selectedIngredients.includes(ing.name)
                                 ? "bg-blue-100 border-blue-500"
                                 : "bg-white border-gray-300 hover:bg-gray-50"
                             }`}
                           >
-                            <div className="font-medium text-black whitespace-nowrap">
+                            <span className="font-medium text-black whitespace-nowrap">
                               {ing.name}
-                            </div>
+                            </span>
                           </button>
                           {selectedIngredients.includes(ing.name) && (
                             <button
                               onClick={() =>
                                 onDeleteIngredient(ing.id, ing.name)
                               }
-                              className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full hover:bg-red-600 text-xs flex items-center justify-center"
+                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full hover:bg-red-600 text-xs flex items-center justify-center"
                               title="删除食材"
                             >
                               ×
@@ -163,11 +163,11 @@ function IngredientsPanel({
             onChange={(e) => setNewIngredientCategory(e.target.value)}
             className="border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
           >
+            <option value="肉类">肉类</option>
             <option value="蔬菜">蔬菜</option>
-            <option value="调料">调料</option>
             <option value="蛋白质">蛋白质</option>
             <option value="乳制品">乳制品</option>
-            <option value="肉类">肉类</option>
+            <option value="调料">调料</option>
             <option value="其他">其他</option>
           </select>
           <button

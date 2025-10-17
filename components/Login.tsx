@@ -27,8 +27,9 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
     try {
       await db.auth.sendMagicCode({ email });
       onSendEmail(email);
-    } catch (err: any) {
-      alert("错误：" + err.body?.message);
+    } catch (err) {
+      const error = err as { body?: { message?: string } };
+      alert("错误：" + error.body?.message);
       onSendEmail("");
     }
   };
@@ -67,9 +68,10 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
     try {
       await db.auth.signInWithMagicCode({ email: sentEmail, code });
       // 成功后，页面重载显示主页
-    } catch (err: any) {
+    } catch (err) {
       inputRef.current!.value = "";
-      alert("错误：" + err.body?.message);
+      const error = err as { body?: { message?: string } };
+      alert("错误：" + error.body?.message);
     }
   };
 

@@ -15,6 +15,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ recipe: text });
   } catch (error) {
-    return NextResponse.json({ error: "生成失败" }, { status: 500 });
+    console.error("API Error:", error);
+    return NextResponse.json(
+      {
+        error: "生成失败",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }
