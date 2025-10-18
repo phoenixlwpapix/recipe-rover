@@ -43,17 +43,15 @@ function FavoritesList({
             selectedFavoriteId === fav.id ? "bg-gray-100" : "hover:bg-gray-100"
           }`}
           onClick={() => {
-            // 重新构建食谱文本用于显示
-            const recipeText = `**标题：** ${
-              fav.recipe?.title
-            }\n**Ingredients:**\n${
+            // 重新构建食谱文本用于显示，使用与生成时相同的中文格式
+            const recipeText = `**标题：** ${fav.recipe?.title}\n**材料:**\n${
               Array.isArray(fav.recipe?.ingredients)
                 ? fav.recipe.ingredients
                     .map((ing: string) => `- ${ing}`)
                     .join("\n")
                 : fav.recipe?.ingredients
-            }\n**Method:**\n${fav.recipe?.instructions}${
-              fav.recipe?.tips ? `\n**Tips:**\n${fav.recipe.tips}` : ""
+            }\n**步骤:**\n${fav.recipe?.instructions}${
+              fav.recipe?.tips ? `\n**小贴士:**\n${fav.recipe.tips}` : ""
             }`;
             onRecipeClick(recipeText, fav.id);
           }}
