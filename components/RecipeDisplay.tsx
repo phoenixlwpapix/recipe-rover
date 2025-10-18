@@ -3,9 +3,15 @@ import { parseRecipe } from "../utils/recipeParser";
 
 interface RecipeDisplayProps {
   recipe: string;
+  onDeleteFavorite?: (favoriteId: string) => void;
+  favoriteId?: string;
 }
 
-function RecipeDisplay({ recipe }: RecipeDisplayProps) {
+function RecipeDisplay({
+  recipe,
+  onDeleteFavorite,
+  favoriteId,
+}: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
 
   return (
@@ -92,6 +98,18 @@ function RecipeDisplay({ recipe }: RecipeDisplayProps) {
               {parsedRecipe.tips}
             </ReactMarkdown>
           </div>
+        </div>
+      )}
+
+      {/* 删除收藏按钮 */}
+      {onDeleteFavorite && favoriteId && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => onDeleteFavorite(favoriteId)}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
+          >
+            删除收藏
+          </button>
         </div>
       )}
     </div>

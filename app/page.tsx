@@ -20,8 +20,10 @@ function SignedInContent() {
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
+  const [recipeType, setRecipeType] = useState<"home" | "michelin">("home");
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -81,15 +83,11 @@ function SignedInContent() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/api/generate-recipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ingredients: selectedIngredients,
-          cuisine: selectedCuisine,
-          prompt: `你是一位享誉全球的世界美食大厨，对各种食材和全球菜系都有精秒深入的理解，请使用这些食材生成一个${selectedCuisine}风格的详细食谱：${selectedIngredients.join(
-            ", "
-          )}。请根据${selectedCuisine}的烹饪特点和风味来设计食谱，整个菜谱中不要加入任何拼音或英文。格式如下：
+      const prompt =
+        recipeType === "home"
+          ? `你是一位经验丰富的家庭厨师，擅长用简单食材制作美味家常菜。请使用这些食材生成一个${selectedCuisine}风格的家常菜谱：${selectedIngredients.join(
+              ", "
+            )}。请注重实用性、营养均衡和简单易做，整个菜谱中不要加入任何拼音或英文。格式如下：
 **标题：** [食谱标题]
 **材料:**
 - [材料1]
@@ -101,7 +99,30 @@ function SignedInContent() {
 3. [步骤3]
 ...
 **小贴士:**
-[一些实用的烹饪小贴士]`,
+[一些实用的烹饪小贴士]`
+          : `你是一位享誉全球的世界美食大厨，对各种食材和全球菜系都有精深理解。请使用这些食材生成一个${selectedCuisine}风格的米其林级精致食谱：${selectedIngredients.join(
+              ", "
+            )}。请注重创新烹饪技巧、精致摆盘和高端食材搭配，整个菜谱中不要加入任何拼音或英文。格式如下：
+**标题：** [食谱标题]
+**材料:**
+- [材料1]
+- [材料2]
+...
+**步骤:**
+1. [步骤1]
+2. [步骤2]
+3. [步骤3]
+...
+**小贴士:**
+[一些实用的烹饪小贴士]`;
+
+      const res = await fetch("/api/generate-recipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ingredients: selectedIngredients,
+          cuisine: selectedCuisine,
+          prompt,
         }),
       });
       const data = await res.json();
@@ -237,11 +258,13 @@ function SignedInContent() {
               setIsMobileMenuOpen(false); // 移动端切换到配料表时关闭菜单
             }
           }}
-          onRecipeClick={(recipeText: string) => {
+          onRecipeClick={(recipeText: string, favoriteId: string) => {
             setSelectedRecipe(recipeText);
+            setSelectedRecipeId(favoriteId);
             setIsMobileMenuOpen(false); // 移动端选择食谱后关闭菜单
           }}
           onDeleteFavorite={deleteFavorite}
+          selectedFavoriteId={selectedRecipeId || undefined}
         />
       </div>
 
@@ -257,9 +280,15 @@ function SignedInContent() {
             loading={loading}
             selectedCuisine={selectedCuisine}
             onCuisineChange={setSelectedCuisine}
+            recipeType={recipeType}
+            onRecipeTypeChange={setRecipeType}
           />
         ) : selectedRecipe ? (
-          <RecipeDisplay recipe={selectedRecipe} />
+          <RecipeDisplay
+            recipe={selectedRecipe}
+            onDeleteFavorite={deleteFavorite}
+            favoriteId={selectedRecipeId || undefined}
+          />
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-600 text-lg">

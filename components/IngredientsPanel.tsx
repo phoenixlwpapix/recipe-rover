@@ -11,6 +11,8 @@ interface IngredientsPanelProps {
   loading: boolean;
   selectedCuisine: string;
   onCuisineChange: (cuisine: string) => void;
+  recipeType: "home" | "michelin";
+  onRecipeTypeChange: (type: "home" | "michelin") => void;
 }
 
 function IngredientsPanel({
@@ -22,6 +24,8 @@ function IngredientsPanel({
   loading,
   selectedCuisine,
   onCuisineChange,
+  recipeType,
+  onRecipeTypeChange,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
@@ -59,6 +63,37 @@ function IngredientsPanel({
 
   const ingredients = ingredientsData?.ingredients || [];
 
+  const commonIngredients = {
+    肉类: ["鸡肉", "牛肉", "猪肉"],
+    蔬菜: ["西红柿", "洋葱", "大蒜"],
+    蛋白质: ["鸡蛋", "豆腐", "豆类"],
+    乳制品: ["牛奶", "奶酪", "酸奶"],
+    调料: ["盐", "胡椒", "酱油"],
+  };
+
+  const handleImportCommonIngredients = async () => {
+    if (!user?.id) return;
+    const ingredientsToAdd = [];
+    for (const [category, ingredients] of Object.entries(commonIngredients)) {
+      for (const name of ingredients) {
+        ingredientsToAdd.push(
+          db.tx.ingredients[id()].update({
+            name,
+            category,
+            userId: user.id,
+            createdAt: Date.now(),
+          })
+        );
+      }
+    }
+    try {
+      await db.transact(ingredientsToAdd);
+    } catch (error) {
+      console.error("导入常见食材失败:", error);
+      alert("导入常见食材失败");
+    }
+  };
+
   const handleAddIngredient = async () => {
     if (!newIngredient.trim() || !user?.id) return;
     try {
@@ -90,7 +125,17 @@ function IngredientsPanel({
         {ingredientsLoading ? (
           <div>加载中...</div>
         ) : ingredients.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">这里空空如也...</div>
+          <div className="text-center py-8 text-gray-500">
+            这里空空如也...
+            <div className="mt-4">
+              <button
+                onClick={handleImportCommonIngredients}
+                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+              >
+                一键导入常见食材
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="space-y-4 mb-4">
             {["肉类", "蔬菜", "蛋白质", "乳制品", "调料", "其他"].map(
@@ -237,13 +282,30 @@ function IngredientsPanel({
           </div>
         </div>
 
-        <button
-          onClick={onGenerateRecipe}
-          disabled={loading || selectedIngredients.length === 0}
-          className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 font-medium disabled:opacity-50"
-        >
-          {loading ? "生成中..." : "生成菜谱"}
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => {
+              onRecipeTypeChange("home");
+              onGenerateRecipe();
+            }}
+            disabled={loading || selectedIngredients.length === 0}
+            className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 font-medium disabled:opacity-50"
+          >
+            {loading && recipeType === "home" ? "生成中..." : "生成家常菜谱"}
+          </button>
+          <button
+            onClick={() => {
+              onRecipeTypeChange("michelin");
+              onGenerateRecipe();
+            }}
+            disabled={loading || selectedIngredients.length === 0}
+            className="flex-1 bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 font-medium disabled:opacity-50"
+          >
+            {loading && recipeType === "michelin"
+              ? "生成中..."
+              : "生成米其林大餐"}
+          </button>
+        </div>
       </div>
     </>
   );

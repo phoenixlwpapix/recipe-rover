@@ -2,14 +2,16 @@ import { db } from "../db/instant";
 
 interface FavoritesListProps {
   userId: string;
-  onRecipeClick: (recipeText: string) => void;
+  onRecipeClick: (recipeText: string, favoriteId: string) => void;
   onDeleteFavorite: (favoriteId: string) => void;
+  selectedFavoriteId?: string;
 }
 
 function FavoritesList({
   userId,
   onRecipeClick,
   onDeleteFavorite,
+  selectedFavoriteId,
 }: FavoritesListProps) {
   const { data, isLoading, error } = db.useQuery({
     favorites: {
@@ -37,7 +39,9 @@ function FavoritesList({
       {favorites.slice(0, 10).map((fav) => (
         <div
           key={fav.id}
-          className="flex justify-between items-center p-2 hover:bg-gray-100 rounded cursor-pointer group"
+          className={`flex justify-between items-center p-2 rounded cursor-pointer group ${
+            selectedFavoriteId === fav.id ? "bg-gray-100" : "hover:bg-gray-100"
+          }`}
           onClick={() => {
             // 重新构建食谱文本用于显示
             const recipeText = `**标题：** ${
@@ -51,7 +55,7 @@ function FavoritesList({
             }\n**Method:**\n${fav.recipe?.instructions}${
               fav.recipe?.tips ? `\n**Tips:**\n${fav.recipe.tips}` : ""
             }`;
-            onRecipeClick(recipeText);
+            onRecipeClick(recipeText, fav.id);
           }}
         >
           <span className="text-sm text-gray-700 truncate flex-1">
