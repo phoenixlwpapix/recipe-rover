@@ -76,7 +76,7 @@ function SignedInContent() {
     });
   };
 
-  const generateRecipe = async () => {
+  const generateRecipe = async (type: "home" | "michelin") => {
     if (selectedIngredients.length === 0) {
       alert("请先选择食材");
       return;
@@ -84,7 +84,7 @@ function SignedInContent() {
     setLoading(true);
     try {
       const prompt =
-        recipeType === "home"
+        type === "home"
           ? `你是一位经验丰富的家庭厨师，擅长用简单食材制作美味家常菜。请使用这些食材生成一个${selectedCuisine}风格的家常菜谱：${selectedIngredients.join(
               ", "
             )}。请注重实用性、营养均衡和简单易做，整个菜谱中不要加入任何拼音或英文。格式如下：
@@ -115,6 +115,8 @@ function SignedInContent() {
 ...
 **小贴士:**
 [一些实用的烹饪小贴士]`;
+
+      console.log("发送的提示词:", prompt);
 
       const res = await fetch("/api/generate-recipe", {
         method: "POST",

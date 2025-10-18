@@ -7,7 +7,7 @@ interface IngredientsPanelProps {
   onToggleIngredient: (ingredientName: string) => void;
   onAddIngredient: () => void;
   onDeleteIngredient: (ingredientId: string, ingredientName: string) => void;
-  onGenerateRecipe: () => void;
+  onGenerateRecipe: (type: "home" | "michelin") => void;
   loading: boolean;
   selectedCuisine: string;
   onCuisineChange: (cuisine: string) => void;
@@ -286,7 +286,7 @@ function IngredientsPanel({
           <button
             onClick={() => {
               onRecipeTypeChange("home");
-              onGenerateRecipe();
+              onGenerateRecipe("home");
             }}
             disabled={loading || selectedIngredients.length === 0}
             className="flex-1 bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 font-medium disabled:opacity-50"
@@ -296,7 +296,7 @@ function IngredientsPanel({
           <button
             onClick={() => {
               onRecipeTypeChange("michelin");
-              onGenerateRecipe();
+              onGenerateRecipe("michelin");
             }}
             disabled={loading || selectedIngredients.length === 0}
             className="flex-1 bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 font-medium disabled:opacity-50"
