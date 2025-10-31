@@ -7,8 +7,15 @@ export default function Login() {
   const [sentEmail, setSentEmail] = useState("");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="max-w-sm w-full space-y-4 p-6 bg-white rounded-lg shadow">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="max-w-md w-full space-y-6 p-8 bg-white rounded-xl shadow-lg border border-gray-200">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            欢迎来到食旅星球
+          </h1>
+          <p className="text-gray-600">探索全球美食，发现烹饪乐趣。</p>
+          <p className="text-gray-600">加入我们，开始您的美食之旅！</p>
+        </div>
         {!sentEmail ? (
           <EmailStep onSendEmail={setSentEmail} />
         ) : (
@@ -36,23 +43,17 @@ function EmailStep({ onSendEmail }: { onSendEmail: (email: string) => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold text-center text-black">
-        登录食旅星球
-      </h2>
-      <p className="text-gray-700 text-center text-sm">
-        输入邮箱，我们发送验证码（无账户将自动创建）。
-      </p>
       <input
         ref={inputRef}
         type="email"
-        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+        className="w-full border border-gray-300 px-3 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black transition duration-200"
         placeholder="your@email.com"
         required
         autoFocus
       />
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium"
+        className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 font-medium transition duration-200"
       >
         发送验证码
       </button>
@@ -77,14 +78,16 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-2xl font-bold text-center text-black">输入验证码</h2>
-      <p className="text-gray-700 text-center text-sm">
-        已发送到 <strong>{sentEmail}</strong>。检查邮箱！
+      <h3 className="text-xl font-semibold text-center text-gray-800">
+        输入验证码
+      </h3>
+      <p className="text-gray-600 text-center text-sm">
+        验证码已发送至 <strong>{sentEmail}</strong>。请检查您的邮箱！
       </p>
       <input
         ref={inputRef}
         type="text"
-        className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+        className="w-full border border-gray-300 px-3 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black transition duration-200"
         placeholder="123456"
         required
         autoFocus
@@ -92,7 +95,7 @@ function CodeStep({ sentEmail }: { sentEmail: string }) {
       />
       <button
         type="submit"
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium"
+        className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 font-medium transition duration-200"
       >
         验证并登录
       </button>

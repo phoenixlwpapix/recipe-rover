@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
 import { db } from "../db/instant";
 import FavoritesList from "./FavoritesList";
 import Image from "next/image";
+import {
+  CubeIcon,
+  HeartIcon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 
 interface SidebarProps {
   activeTab: "ingredients" | "favorites";
@@ -18,89 +23,81 @@ function Sidebar({
   onDeleteFavorite,
   selectedFavoriteId,
 }: SidebarProps) {
-  const [favoritesExpanded, setFavoritesExpanded] = useState(false);
   const user = db.useUser();
 
   return (
-    <div className="w-64 bg-white shadow-lg h-screen flex flex-col">
-      <div className="py-6">
-        <div className="flex items-center justify-center mb-8">
-          <Image
-            src="/logo.png"
-            alt="食旅星球"
-            width={32}
-            height={32}
-            className="mr-3"
-          />
-          <h1 className="text-2xl font-bold text-black">食旅星球</h1>
+    <div className="w-64 bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen flex flex-col border-r border-slate-200">
+      <div className="py-8 px-6">
+        <div className="flex items-center justify-center mb-10">
+          <div className="relative">
+            <Image
+              src="/logo.png"
+              alt="食旅星球"
+              width={40}
+              height={40}
+              className="mr-4 drop-shadow-sm"
+            />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+            食旅星球
+          </h1>
         </div>
-        <nav className="space-y-2">
+        <nav className="space-y-3">
           <button
             onClick={() => onTabChange("ingredients")}
-            className={`w-full text-left py-3 font-medium ${
+            className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
               activeTab === "ingredients"
-                ? "bg-blue-100 text-blue-700"
-                : "text-gray-700 hover:bg-gray-100 px-4 rounded-md"
+                ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
             }`}
           >
-            <span className={activeTab === "ingredients" ? "pl-4" : ""}>
-              我的食材库
-            </span>
+            <CubeIcon
+              className={`w-5 h-5 mr-3 transition-colors ${
+                activeTab === "ingredients"
+                  ? "text-white"
+                  : "text-slate-500 group-hover:text-slate-700"
+              }`}
+            />
+            <span>我的食材库</span>
           </button>
           <div className="relative">
             <button
-              onClick={() => {
-                onTabChange("favorites");
-                setFavoritesExpanded(!favoritesExpanded);
-              }}
-              className={`w-full text-left py-3 font-medium ${
+              onClick={() => onTabChange("favorites")}
+              className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                 activeTab === "favorites"
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100 px-4 rounded-md"
+                  ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
               }`}
             >
-              <span className={activeTab === "favorites" ? "pl-4" : ""}>
-                我的收藏
-                <svg
-                  className={`w-4 h-4 ml-2 inline transition-transform ${
-                    favoritesExpanded ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </span>
+              <HeartIcon
+                className={`w-5 h-5 mr-3 transition-colors ${
+                  activeTab === "favorites"
+                    ? "text-white"
+                    : "text-slate-500 group-hover:text-slate-700"
+                }`}
+              />
+              <span>我的收藏</span>
             </button>
-            {activeTab === "favorites" && favoritesExpanded && (
-              <div className="mt-2 ml-4 space-y-1 max-h-60 overflow-y-auto">
-                <FavoritesList
-                  userId={user?.id || ""}
-                  onRecipeClick={(recipeText, favoriteId) => {
-                    onRecipeClick(recipeText, favoriteId);
-                  }}
-                  onDeleteFavorite={onDeleteFavorite}
-                  selectedFavoriteId={selectedFavoriteId}
-                />
-              </div>
-            )}
+            <div className="mt-3 ml-6 space-y-2 transition-all duration-300">
+              <FavoritesList
+                userId={user?.id || ""}
+                onRecipeClick={(recipeText, favoriteId) => {
+                  onRecipeClick(recipeText, favoriteId);
+                }}
+                onDeleteFavorite={onDeleteFavorite}
+                selectedFavoriteId={selectedFavoriteId}
+              />
+            </div>
           </div>
         </nav>
       </div>
-      <div className="border-t mt-auto">
+      <div className="border-t border-slate-200 mt-auto bg-slate-50/50">
         <button
           onClick={() => db.auth.signOut()}
-          className={`w-full bg-red-600 text-white py-2 hover:bg-red-700 ${
-            false ? "" : "px-4 rounded-none"
-          }`}
+          className="group w-full flex items-center justify-center px-4 py-4 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 rounded-none"
         >
-          <span className={false ? "pl-4" : ""}>登出</span>
+          <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3 group-hover:text-red-500" />
+          <span className="font-medium">登出</span>
         </button>
       </div>
     </div>

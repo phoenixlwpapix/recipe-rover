@@ -19,11 +19,13 @@ function SignedInContent() {
   const [recipe, setRecipe] = useState("");
   const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingType, setLoadingType] = useState<"manual" | "random" | null>(
+    null
+  );
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
-  const [recipeType, setRecipeType] = useState<"home" | "michelin">("home");
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -37,12 +39,24 @@ function SignedInContent() {
   });
   const user = db.useUser();
 
+  const { data: ingredientsData } = db.useQuery({
+    ingredients: {
+      $: { where: { userId: user?.id } },
+    },
+  });
+
+  const ingredients = ingredientsData?.ingredients || [];
+
   const toggleIngredient = (ingredientName: string) => {
     setSelectedIngredients((prev) =>
       prev.includes(ingredientName)
         ? prev.filter((i) => i !== ingredientName)
         : [...prev, ingredientName]
     );
+  };
+
+  const clearSelectedIngredients = () => {
+    setSelectedIngredients([]);
   };
 
   const deleteIngredient = (ingredientId: string, ingredientName: string) => {
@@ -76,33 +90,21 @@ function SignedInContent() {
     });
   };
 
-  const generateRecipe = async (type: "home" | "michelin") => {
-    if (selectedIngredients.length === 0) {
+  const generateRecipe = async (
+    forcedIngredients?: string[],
+    type: "manual" | "random" = "manual"
+  ) => {
+    const ingredientsToUse = forcedIngredients || selectedIngredients;
+    if (ingredientsToUse.length === 0) {
       alert("请先选择食材");
       return;
     }
     setLoading(true);
+    setLoadingType(type);
     try {
-      const prompt =
-        type === "home"
-          ? `你是一位经验丰富的家庭厨师，擅长用简单食材制作美味家常菜。请使用这些食材生成一个${selectedCuisine}风格的家常菜谱：${selectedIngredients.join(
-              ", "
-            )}。请注重实用性、营养均衡和简单易做，整个菜谱中不要加入任何拼音或英文。格式如下：
-**标题：** [食谱标题]
-**材料:**
-- [材料1]
-- [材料2]
-...
-**步骤:**
-1. [步骤1]
-2. [步骤2]
-3. [步骤3]
-...
-**小贴士:**
-[一些实用的烹饪小贴士]`
-          : `你是一位享誉全球的世界美食大厨，对各种食材和全球菜系都有精深理解。请使用这些食材生成一个${selectedCuisine}风格的米其林级精致食谱：${selectedIngredients.join(
-              ", "
-            )}。请注重创新烹饪技巧、精致摆盘和高端食材搭配，整个菜谱中不要加入任何拼音或英文。格式如下：
+      const prompt = `你是一位经验丰富的家庭厨师，擅长用简单食材制作美味家常菜。请使用这些食材生成一个${selectedCuisine}风格的家常菜谱：${ingredientsToUse.join(
+        ", "
+      )}。请注重实用性、营养均衡和简单易做，整个菜谱中不要加入任何拼音或英文。格式如下：
 **标题：** [食谱标题]
 **材料:**
 - [材料1]
@@ -122,7 +124,7 @@ function SignedInContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ingredients: selectedIngredients,
+          ingredients: ingredientsToUse,
           cuisine: selectedCuisine,
           prompt,
         }),
@@ -130,6 +132,16 @@ function SignedInContent() {
       const data = await res.json();
       if (data.recipe) {
         setRecipe(data.recipe);
+        // Scroll to recipe section after generation
+        setTimeout(() => {
+          const recipeElement = document.querySelector("[data-recipe-display]");
+          if (recipeElement) {
+            recipeElement.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }, 100);
         // TODO: 实现保存食谱逻辑
         console.log("食谱生成成功:", data.recipe);
       } else {
@@ -139,6 +151,7 @@ function SignedInContent() {
       alert("错误：" + error);
     }
     setLoading(false);
+    setLoadingType(null);
   };
 
   const addToFavorites = async () => {
@@ -209,15 +222,15 @@ function SignedInContent() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       {/* 移动端汉堡菜单按钮 */}
-      <div className="md:hidden fixed top-4 left-4 z-20">
+      <div className="md:hidden fixed top-6 left-6 z-20">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 bg-white rounded-md shadow-lg"
+          className="p-3 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border border-white/20"
         >
           <svg
-            className="w-6 h-6"
+            className="w-6 h-6 text-slate-700"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -239,7 +252,7 @@ function SignedInContent() {
       {/* 移动端遮罩 */}
       {isMobileMenuOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+          className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -263,7 +276,10 @@ function SignedInContent() {
           onRecipeClick={(recipeText: string, favoriteId: string) => {
             setSelectedRecipe(recipeText);
             setSelectedRecipeId(favoriteId);
+            setActiveTab("favorites"); // 切换到收藏标签页显示详情
             setIsMobileMenuOpen(false); // 移动端选择食谱后关闭菜单
+            // 滚动到页面顶部
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           onDeleteFavorite={deleteFavorite}
           selectedFavoriteId={selectedRecipeId || undefined}
@@ -271,19 +287,19 @@ function SignedInContent() {
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-8 pt-16 md:pt-8 md:overflow-y-auto">
+      <div className="flex-1 p-8 pt-20 md:pt-8 md:overflow-y-auto">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}
             onToggleIngredient={toggleIngredient}
-            onAddIngredient={() => {}}
             onDeleteIngredient={deleteIngredient}
             onGenerateRecipe={generateRecipe}
+            loadingType={loadingType || undefined}
+            onClearSelectedIngredients={clearSelectedIngredients}
             loading={loading}
             selectedCuisine={selectedCuisine}
             onCuisineChange={setSelectedCuisine}
-            recipeType={recipeType}
-            onRecipeTypeChange={setRecipeType}
+            ingredients={ingredients}
           />
         ) : selectedRecipe ? (
           <RecipeDisplay
@@ -292,21 +308,54 @@ function SignedInContent() {
             favoriteId={selectedRecipeId || undefined}
           />
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg">
-              请从左侧选择一个收藏的食谱查看详情
-            </p>
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <div className="w-24 h-24 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <svg
+                  className="w-12 h-12 text-slate-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-slate-700 mb-2">
+                选择收藏的食谱
+              </h3>
+              <p className="text-slate-500">
+                请从左侧选择一个收藏的食谱查看详情
+              </p>
+            </div>
           </div>
         )}
         {loading && activeTab === "ingredients" && <RecipeSkeleton />}
         {recipe && !loading && activeTab === "ingredients" && (
-          <div>
+          <div data-recipe-display>
             <RecipeDisplay recipe={recipe} />
-            <div className="mt-4 text-center">
+            <div className="mt-8 text-center">
               <button
                 onClick={addToFavorites}
-                className="bg-yellow-500 text-white px-6 py-3 rounded-md hover:bg-yellow-600 font-medium transition-colors"
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
                 收藏食谱
               </button>
             </div>
