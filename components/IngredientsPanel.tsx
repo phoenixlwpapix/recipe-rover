@@ -134,7 +134,7 @@ function IngredientsPanel({
       <div>
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-2xl font-bold text-slate-800">食材选择</h3>
+            <h3 className="text-xl font-bold text-slate-800">食材选择</h3>
             <div className="flex gap-2">
               {!showAddForm && (
                 <button
@@ -318,8 +318,8 @@ function IngredientsPanel({
 
         {/* 菜系选择 */}
         <div className="mb-8">
-          <label className="block text-lg font-semibold text-slate-800 mb-4">
-            选择菜系
+          <label className="block text-xl font-semibold text-slate-800 mb-4">
+            菜系选择
           </label>
           <div className="flex flex-wrap gap-2">
             {cuisines.map((cuisine) => (

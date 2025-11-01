@@ -13,12 +13,14 @@ interface RecipeDisplayProps {
   recipe: string;
   onDeleteFavorite?: (favoriteId: string) => void;
   favoriteId?: string;
+  onAddToFavorites?: () => void;
 }
 
 function RecipeDisplay({
   recipe,
   onDeleteFavorite,
   favoriteId,
+  onAddToFavorites,
 }: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
 
@@ -134,9 +136,30 @@ function RecipeDisplay({
           </div>
         )}
 
-        {/* 删除收藏按钮 */}
-        {onDeleteFavorite && favoriteId && (
-          <div className="md:mt-8 my-4 flex justify-center">
+        {/* 收藏和删除按钮 */}
+        <div className="md:mt-8 my-4 flex justify-center gap-4">
+          {onAddToFavorites && !favoriteId && (
+            <button
+              onClick={onAddToFavorites}
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+              收藏食谱
+            </button>
+          )}
+          {onDeleteFavorite && favoriteId && (
             <button
               onClick={() => onDeleteFavorite(favoriteId)}
               className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white font-semibold rounded-xl hover:from-red-600 hover:to-rose-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
@@ -144,8 +167,8 @@ function RecipeDisplay({
               <TrashIcon className="w-5 h-5 mr-2" />
               删除收藏
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
