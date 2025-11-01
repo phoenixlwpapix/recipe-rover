@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { db } from "../db/instant"; // 相对路径，从 app 到根 db
 import { id } from "@instantdb/react";
 import Login from "../components/Login"; // 从 app 到根 components
@@ -17,7 +17,7 @@ function SignedInContent() {
   );
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [recipe, setRecipe] = useState("");
-  const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
+  // const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<"manual" | "random" | null>(
     null
@@ -263,7 +263,7 @@ function SignedInContent() {
         className={`
         fixed left-0 top-0 h-full z-40 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0 md:static md:z-10 md:sticky md:top-0 md:h-screen
+        md:translate-x-0 md:z-10 md:sticky md:top-0 md:h-screen
       `}
       >
         <Sidebar
@@ -290,7 +290,7 @@ function SignedInContent() {
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-4 pt-20 md:pt-8 md:p-8 md:overflow-y-auto flex flex-col min-h-screen">
+      <div className="flex-1 p-0 pt-20 md:pt-8 md:p-8 md:overflow-y-auto flex flex-col min-h-screen">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}

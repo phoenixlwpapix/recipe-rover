@@ -23,8 +23,8 @@ function RecipeDisplay({
   const parsedRecipe = parseRecipe(recipe);
 
   return (
-    <div className="mt-4 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 md:p-4 p-2 text-white">
+    <div className="mt-4 md:bg-white/80 md:backdrop-blur-sm md:rounded-3xl md:shadow-2xl md:border md:border-white/20 md:overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 p-4 md:p-6 text-white">
         <h2 className="text-3xl font-bold mb-2">
           {parsedRecipe.title || "食谱"}
         </h2>
@@ -34,8 +34,8 @@ function RecipeDisplay({
         </div>
       </div>
 
-      <div className="md:p-4 p-0">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-8 gap-0">
+      <div className="p-2 md:p-8">
+        <div className="grid md:grid-cols-2 gap-8">
           {/* Ingredients 左栏 */}
           <div className="md:bg-gradient-to-br md:from-green-50 md:to-emerald-50 md:rounded-2xl md:p-6 md:border md:border-green-100 p-4 px-4">
             <div className="flex items-center mb-6">
@@ -102,7 +102,7 @@ function RecipeDisplay({
 
         {/* Tips 栏 */}
         {parsedRecipe.tips && (
-          <div className="mt-8 md:bg-gradient-to-br md:from-amber-50 md:to-orange-50 md:rounded-2xl md:p-6 md:border md:border-amber-100 md:mt-8 mt-4 p-4 px-4">
+          <div className="md:bg-gradient-to-br md:from-amber-50 md:to-orange-50 md:rounded-2xl md:p-6 md:border md:border-amber-100 md:mt-8 mt-4 p-4 px-4">
             <div className="flex items-center mb-4">
               <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center mr-3">
                 <ExclamationTriangleIcon className="w-6 h-6 text-white" />
