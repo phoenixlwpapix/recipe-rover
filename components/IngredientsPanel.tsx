@@ -135,26 +135,26 @@ function IngredientsPanel({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-2xl font-bold text-slate-800">食材选择</h3>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               {!showAddForm && (
                 <button
                   onClick={() => setIsEditMode(!isEditMode)}
-                  className={`inline-flex items-center px-4 py-2 font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ${
+                  className={`inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ${
                     isEditMode
                       ? "bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600"
                       : "bg-gradient-to-r from-slate-500 to-slate-600 text-white hover:from-slate-600 hover:to-slate-700"
                   }`}
                 >
-                  <PencilIcon className="w-4 h-4 mr-2" />
+                  <PencilIcon className="w-3.5 h-3.5 mr-1.5" />
                   {isEditMode ? "退出编辑" : "编辑食材"}
                 </button>
               )}
               {!showAddForm && (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  <PlusIcon className="w-4 h-4 mr-2" />
+                  <PlusIcon className="w-3.5 h-3.5 mr-1.5" />
                   添加食材
                 </button>
               )}
@@ -164,23 +164,22 @@ function IngredientsPanel({
           {/* 选中的食材 */}
           {selectedIngredients.length > 0 && (
             <div className="mb-4">
-              <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg flex justify-between items-start">
-                <div className="flex flex-wrap gap-2 flex-1">
-                  {selectedIngredients.map((ing) => (
-                    <span
-                      key={ing}
-                      className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 font-medium rounded-xl border border-blue-300/50 shadow-sm"
-                    >
-                      <CheckIcon className="w-4 h-4 mr-2 text-blue-600" />
-                      {ing}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2 items-center">
+                {selectedIngredients.map((ing) => (
+                  <span
+                    key={ing}
+                    className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 font-medium rounded-lg border border-blue-300/50 shadow-sm text-sm"
+                  >
+                    <CheckIcon className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                    {ing}
+                  </span>
+                ))}
                 <button
                   onClick={onClearSelectedIngredients}
-                  className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-rose-500 text-white text-sm font-semibold rounded-xl hover:from-red-600 hover:to-rose-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ml-4"
+                  className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-red-500 to-rose-500 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-rose-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ml-2"
                 >
-                  <TrashIcon className="w-4 h-4" />
+                  <TrashIcon className="w-3.5 h-3.5 mr-1" />
+                  清空
                 </button>
               </div>
             </div>
@@ -244,9 +243,6 @@ function IngredientsPanel({
                                 : "bg-white/80 backdrop-blur-sm border-slate-300 hover:border-slate-400 hover:bg-white hover:shadow-md text-slate-700 hover:text-slate-800"
                             }`}
                           >
-                            {selectedIngredients.includes(ing.name) && (
-                              <CheckIcon className="w-4 h-4 mr-2" />
-                            )}
                             <span className="whitespace-nowrap">
                               {ing.name}
                             </span>
@@ -325,12 +321,12 @@ function IngredientsPanel({
           <label className="block text-lg font-semibold text-slate-800 mb-4">
             选择菜系
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+          <div className="flex flex-wrap gap-2">
             {cuisines.map((cuisine) => (
               <button
                 key={cuisine}
                 onClick={() => onCuisineChange(cuisine)}
-                className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
+                className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   selectedCuisine === cuisine
                     ? "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25 transform scale-105"
                     : "bg-white/80 backdrop-blur-sm border-slate-300 hover:border-slate-400 hover:bg-white hover:shadow-md text-slate-700 hover:text-slate-800"
@@ -349,7 +345,7 @@ function IngredientsPanel({
             className={`inline-flex items-center justify-center px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg ${
               loading || selectedIngredients.length === 0
                 ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-green-500 to-emerald-500 text-white hover:from-green-600 hover:to-emerald-600 transform hover:scale-105 hover:shadow-xl"
+                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 hover:shadow-xl"
             }`}
           >
             {loading && loadingType === "manual" ? (

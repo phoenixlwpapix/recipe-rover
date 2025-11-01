@@ -37,6 +37,7 @@ function SignedInContent() {
     message: "",
     onConfirm: () => {},
   });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const user = db.useUser();
 
   const { data: ingredientsData } = db.useQuery({
@@ -283,11 +284,13 @@ function SignedInContent() {
           }}
           onDeleteFavorite={deleteFavorite}
           selectedFavoriteId={selectedRecipeId || undefined}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-8 pt-20 md:pt-8 md:overflow-y-auto">
+      <div className="flex-1 p-4 pt-20 md:pt-8 md:p-8 md:overflow-y-auto flex flex-col min-h-screen">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}
@@ -361,6 +364,13 @@ function SignedInContent() {
             </div>
           </div>
         )}
+
+        {/* Footer */}
+        <footer className="mt-auto pt-8 border-t border-slate-200">
+          <div className="text-center text-slate-500 text-sm">
+            <p>© 2025 食旅星球. Made with ❤️ for food lovers.</p>
+          </div>
+        </footer>
       </div>
 
       <ConfirmModal
