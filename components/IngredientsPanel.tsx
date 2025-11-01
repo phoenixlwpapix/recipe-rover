@@ -39,7 +39,6 @@ function IngredientsPanel({
   loadingType,
   selectedCuisine,
   onCuisineChange,
-  ingredients,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
