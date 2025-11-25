@@ -17,6 +17,7 @@ function SignedInContent() {
   );
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [recipe, setRecipe] = useState("");
+  const [recipeImage, setRecipeImage] = useState<string | undefined>();
   // const [savedRecipeId, setSavedRecipeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<"manual" | "random" | null>(
@@ -133,6 +134,7 @@ function SignedInContent() {
       const data = await res.json();
       if (data.recipe) {
         setRecipe(data.recipe);
+        setRecipeImage(data.image);
         // Scroll to recipe section after generation
         setTimeout(() => {
           const recipeElement = document.querySelector("[data-recipe-display]");
@@ -169,6 +171,12 @@ function SignedInContent() {
 
     try {
       const parsedRecipe = parseRecipe(recipe);
+      let imageUrl = undefined;
+
+      if (recipeImage) {
+        imageUrl = recipeImage;
+      }
+
       const favoriteId = id();
       const recipeId = id();
       await db.transact([
@@ -177,6 +185,7 @@ function SignedInContent() {
           ingredients: parsedRecipe.ingredients,
           instructions: parsedRecipe.instructions,
           tips: parsedRecipe.tips,
+          image: imageUrl,
           userId: user.id,
           createdAt: Date.now(),
         }),
@@ -274,9 +283,14 @@ function SignedInContent() {
               setIsMobileMenuOpen(false); // 移动端切换到配料表时关闭菜单
             }
           }}
-          onRecipeClick={(recipeText: string, favoriteId: string) => {
+          onRecipeClick={(
+            recipeText: string,
+            favoriteId: string,
+            image?: string
+          ) => {
             setSelectedRecipe(recipeText);
             setSelectedRecipeId(favoriteId);
+            setRecipeImage(image);
             setActiveTab("favorites"); // 切换到收藏标签页显示详情
             setIsMobileMenuOpen(false); // 移动端选择食谱后关闭菜单
             // 滚动到页面顶部
@@ -307,6 +321,7 @@ function SignedInContent() {
         ) : selectedRecipe ? (
           <RecipeDisplay
             recipe={selectedRecipe}
+            image={recipeImage}
             onDeleteFavorite={deleteFavorite}
             favoriteId={selectedRecipeId || undefined}
             onAddToFavorites={addToFavorites}
@@ -341,7 +356,11 @@ function SignedInContent() {
         {loading && activeTab === "ingredients" && <RecipeSkeleton />}
         {recipe && !loading && activeTab === "ingredients" && (
           <div data-recipe-display>
-            <RecipeDisplay recipe={recipe} onAddToFavorites={addToFavorites} />
+            <RecipeDisplay
+              recipe={recipe}
+              image={recipeImage}
+              onAddToFavorites={addToFavorites}
+            />
           </div>
         )}
 

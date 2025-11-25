@@ -12,7 +12,11 @@ import {
 interface SidebarProps {
   activeTab: "ingredients" | "favorites";
   onTabChange: (tab: "ingredients" | "favorites") => void;
-  onRecipeClick: (recipeText: string, favoriteId: string) => void;
+  onRecipeClick: (
+    recipeText: string,
+    favoriteId: string,
+    image?: string
+  ) => void;
   onDeleteFavorite: (favoriteId: string) => void;
   selectedFavoriteId?: string;
   isCollapsed?: boolean;
@@ -116,8 +120,8 @@ function Sidebar({
               <div className="mt-3 ml-6 space-y-2 transition-all duration-300">
                 <FavoritesList
                   userId={user?.id || ""}
-                  onRecipeClick={(recipeText, favoriteId) => {
-                    onRecipeClick(recipeText, favoriteId);
+                  onRecipeClick={(recipeText, favoriteId, image) => {
+                    onRecipeClick(recipeText, favoriteId, image);
                   }}
                   onDeleteFavorite={onDeleteFavorite}
                   selectedFavoriteId={selectedFavoriteId}

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import Image from "next/image";
 import { parseRecipe } from "../utils/recipeParser";
+import ImageModal from "./ImageModal";
 import {
   BookOpenIcon,
   ClipboardDocumentListIcon,
@@ -11,6 +13,7 @@ import {
 
 interface RecipeDisplayProps {
   recipe: string;
+  image?: string;
   onDeleteFavorite?: (favoriteId: string) => void;
   favoriteId?: string;
   onAddToFavorites?: () => void;
@@ -18,21 +21,58 @@ interface RecipeDisplayProps {
 
 function RecipeDisplay({
   recipe,
+  image,
   onDeleteFavorite,
   favoriteId,
   onAddToFavorites,
 }: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleImageClick = () => {
+    if (image) setIsModalOpen(true);
+  };
 
   return (
     <div className="mt-4 md:bg-white/80 md:backdrop-blur-sm md:rounded-3xl md:shadow-2xl md:border md:border-white/20 md:overflow-hidden">
-      <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 p-4 md:p-6 text-white">
-        <h2 className="text-3xl font-bold mb-2">
-          {parsedRecipe.title || "食谱"}
-        </h2>
-        <div className="flex items-center text-slate-200">
-          <BookOpenIcon className="w-5 h-5 mr-2" />
-          美味食谱
+      <div className="relative h-48 md:h-56 overflow-hidden bg-slate-700">
+        {/* 背景图片 - 完全铺满标题栏 */}
+        {image ? (
+          <Image
+            src={image}
+            alt={parsedRecipe.title || "食谱图片"}
+            fill
+            className="object-cover object-center"
+            priority
+          />
+        ) : (
+          // 可选：无图时的渐变兜底背景
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600" />
+        )}
+
+        {/* 左侧深色渐变遮罩，让文字始终清晰可见 */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/50 to-transparent" />
+
+        {/* 可点击的图片覆盖层 */}
+        {image && (
+          <div
+            className="absolute inset-0 z-20 cursor-pointer"
+            onClick={handleImageClick}
+            aria-label="查看大图"
+          />
+        )}
+
+        {/* 内容层 */}
+        <div className="relative z-10 flex items-center h-full px-6 md:px-8 max-w-7xl mx-auto">
+          <div className="max-w-2xl">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 leading-tight drop-shadow-lg">
+              {parsedRecipe.title || "食谱"}
+            </h2>
+            <div className="flex items-center text-slate-100 text-lg drop-shadow-md">
+              <BookOpenIcon className="w-6 h-6 mr-2" />
+              美味食谱
+            </div>
+          </div>
         </div>
       </div>
 
@@ -93,7 +133,20 @@ function RecipeDisplay({
                         <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 text-white text-sm font-bold rounded-full mr-3 flex-shrink-0 mt-0.5">
                           {index + 1}
                         </span>
-                        <span className="leading-relaxed">{stepText}</span>
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => (
+                              <span className="leading-relaxed">
+                                {children}
+                              </span>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-bold">{children}</strong>
+                            ),
+                          }}
+                        >
+                          {stepText}
+                        </ReactMarkdown>
                       </li>
                     );
                   })}
@@ -170,6 +223,13 @@ function RecipeDisplay({
           )}
         </div>
       </div>
+
+      <ImageModal
+        isOpen={isModalOpen}
+        imageSrc={image!}
+        alt={parsedRecipe.title || "食谱图片"}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

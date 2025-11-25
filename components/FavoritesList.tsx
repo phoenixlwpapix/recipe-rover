@@ -2,7 +2,11 @@ import { db } from "../db/instant";
 
 interface FavoritesListProps {
   userId: string;
-  onRecipeClick: (recipeText: string, favoriteId: string) => void;
+  onRecipeClick: (
+    recipeText: string,
+    favoriteId: string,
+    image?: string
+  ) => void;
   onDeleteFavorite: (favoriteId: string) => void;
   selectedFavoriteId?: string;
 }
@@ -53,7 +57,7 @@ function FavoritesList({
             }\n**步骤:**\n${fav.recipe?.instructions}${
               fav.recipe?.tips ? `\n**小贴士:**\n${fav.recipe.tips}` : ""
             }`;
-            onRecipeClick(recipeText, fav.id);
+            onRecipeClick(recipeText, fav.id, fav.recipe?.image);
           }}
         >
           <span className="text-sm text-gray-700 truncate flex-1">

@@ -16,6 +16,7 @@ const _schema = i.schema({
       ingredients: i.json(), // 存储数组如 ["盐", "糖"]
       instructions: i.string(),
       tips: i.string().optional(),
+      image: i.string().optional(),
       userId: i.string().indexed(),
       createdAt: i.number().indexed(),
     }),
