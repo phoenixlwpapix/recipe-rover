@@ -17,6 +17,7 @@ interface RecipeDisplayProps {
   onDeleteFavorite?: (favoriteId: string) => void;
   favoriteId?: string;
   onAddToFavorites?: () => void;
+  cuisine?: string;
 }
 
 function RecipeDisplay({
@@ -25,6 +26,7 @@ function RecipeDisplay({
   onDeleteFavorite,
   favoriteId,
   onAddToFavorites,
+  cuisine,
 }: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,13 +72,13 @@ function RecipeDisplay({
             </h2>
             <div className="flex items-center text-slate-100 text-lg drop-shadow-md">
               <BookOpenIcon className="w-6 h-6 mr-2" />
-              美味食谱
+              {cuisine ? `${cuisine}美食` : "美味食谱"}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="p-2 md:p-8">
+      <div className="p-4 md:p-8">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Ingredients 左栏 */}
           <div className="md:bg-gradient-to-br md:from-green-50 md:to-emerald-50 md:rounded-2xl md:p-6 md:border md:border-green-100 p-4 px-4">

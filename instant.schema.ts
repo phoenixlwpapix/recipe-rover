@@ -17,6 +17,7 @@ const _schema = i.schema({
       instructions: i.string(),
       tips: i.string().optional(),
       image: i.string().optional(),
+      cuisine: i.string().optional(),
       userId: i.string().indexed(),
       createdAt: i.number().indexed(),
     }),

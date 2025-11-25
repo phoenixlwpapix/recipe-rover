@@ -25,6 +25,9 @@ function SignedInContent() {
   );
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const [selectedRecipeCuisine, setSelectedRecipeCuisine] = useState<
+    string | undefined
+  >(undefined);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedCuisine, setSelectedCuisine] = useState("中国菜");
   const [confirmModal, setConfirmModal] = useState<{
@@ -186,6 +189,7 @@ function SignedInContent() {
           instructions: parsedRecipe.instructions,
           tips: parsedRecipe.tips,
           image: imageUrl,
+          cuisine: selectedCuisine,
           userId: user.id,
           createdAt: Date.now(),
         }),
@@ -286,11 +290,13 @@ function SignedInContent() {
           onRecipeClick={(
             recipeText: string,
             favoriteId: string,
-            image?: string
+            image?: string,
+            cuisine?: string
           ) => {
             setSelectedRecipe(recipeText);
             setSelectedRecipeId(favoriteId);
             setRecipeImage(image);
+            setSelectedRecipeCuisine(cuisine);
             setActiveTab("favorites"); // 切换到收藏标签页显示详情
             setIsMobileMenuOpen(false); // 移动端选择食谱后关闭菜单
             // 滚动到页面顶部
@@ -304,7 +310,7 @@ function SignedInContent() {
       </div>
 
       {/* 右侧内容 */}
-      <div className="flex-1 p-0 pt-20 md:pt-8 md:p-8 md:overflow-y-auto flex flex-col min-h-screen">
+      <div className="flex-1 p-0 pt-20 px-4 md:pt-8 md:p-8 md:overflow-y-auto flex flex-col min-h-screen">
         {activeTab === "ingredients" ? (
           <IngredientsPanel
             selectedIngredients={selectedIngredients}
@@ -325,6 +331,7 @@ function SignedInContent() {
             onDeleteFavorite={deleteFavorite}
             favoriteId={selectedRecipeId || undefined}
             onAddToFavorites={addToFavorites}
+            cuisine={selectedRecipeCuisine}
           />
         ) : (
           <div className="text-center py-16">
@@ -360,6 +367,7 @@ function SignedInContent() {
               recipe={recipe}
               image={recipeImage}
               onAddToFavorites={addToFavorites}
+              cuisine={selectedCuisine}
             />
           </div>
         )}

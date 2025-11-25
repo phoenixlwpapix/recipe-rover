@@ -15,7 +15,8 @@ interface SidebarProps {
   onRecipeClick: (
     recipeText: string,
     favoriteId: string,
-    image?: string
+    image?: string,
+    cuisine?: string
   ) => void;
   onDeleteFavorite: (favoriteId: string) => void;
   selectedFavoriteId?: string;
@@ -120,8 +121,8 @@ function Sidebar({
               <div className="mt-3 ml-6 space-y-2 transition-all duration-300">
                 <FavoritesList
                   userId={user?.id || ""}
-                  onRecipeClick={(recipeText, favoriteId, image) => {
-                    onRecipeClick(recipeText, favoriteId, image);
+                  onRecipeClick={(recipeText, favoriteId, image, cuisine) => {
+                    onRecipeClick(recipeText, favoriteId, image, cuisine);
                   }}
                   onDeleteFavorite={onDeleteFavorite}
                   selectedFavoriteId={selectedFavoriteId}

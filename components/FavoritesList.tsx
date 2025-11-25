@@ -5,7 +5,8 @@ interface FavoritesListProps {
   onRecipeClick: (
     recipeText: string,
     favoriteId: string,
-    image?: string
+    image?: string,
+    cuisine?: string
   ) => void;
   onDeleteFavorite: (favoriteId: string) => void;
   selectedFavoriteId?: string;
@@ -57,7 +58,12 @@ function FavoritesList({
             }\n**步骤:**\n${fav.recipe?.instructions}${
               fav.recipe?.tips ? `\n**小贴士:**\n${fav.recipe.tips}` : ""
             }`;
-            onRecipeClick(recipeText, fav.id, fav.recipe?.image);
+            onRecipeClick(
+              recipeText,
+              fav.id,
+              fav.recipe?.image,
+              fav.recipe?.cuisine
+            );
           }}
         >
           <span className="text-sm text-gray-700 truncate flex-1">
