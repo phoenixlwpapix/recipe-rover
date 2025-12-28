@@ -1,56 +1,50 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
-import { parseRecipe } from "../../../utils/recipeParser";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Initialize the API client
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
-export const generateImage = async (prompt: string): Promise<string> => {
+// Model configuration
+const TEXT_MODEL = "gemini-2.5-flash";
+
+/**
+ * 生成食谱文本
+ */
+const generateRecipeText = async (prompt: string): Promise<string> => {
   try {
-    const response = await ai.models.generateImages({
-      model: "imagen-4.0-generate-001",
-      prompt: prompt,
-      config: {
-        numberOfImages: 1,
-        outputMimeType: "image/png",
-        aspectRatio: "16:9",
-      },
+    const response = await ai.models.generateContent({
+      model: TEXT_MODEL,
+      contents: prompt,
     });
 
-    if (response.generatedImages && response.generatedImages.length > 0) {
-      const base64ImageBytes: string =
-        response.generatedImages[0].image!.imageBytes!;
-      return `data:image/png;base64,${base64ImageBytes}`;
+    const text = (response as GenerateContentResponse).text;
+    if (!text) {
+      throw new Error("No text generated");
     }
-    throw new Error("error_no_image_generated");
+    return text;
   } catch (error) {
-    console.error("Error generating image:", error);
-    if (
-      error instanceof Error &&
-      error.message === "error_no_image_generated"
-    ) {
-      throw error;
-    }
-    throw new Error("error_generate_image");
+    console.error("Error generating recipe text:", error);
+    throw error;
   }
 };
 
 export async function POST(request: NextRequest) {
   try {
-    const { ingredients, cuisine, prompt } = await request.json();
+    const { prompt } = await request.json();
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    if (!prompt) {
+      return NextResponse.json(
+        { error: "缺少 prompt 参数" },
+        { status: 400 }
+      );
+    }
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+    // 只生成食谱文本，图片异步生成
+    const recipeText = await generateRecipeText(prompt);
 
-    const parsedRecipe = parseRecipe(text);
-    const imagePrompt = `A delicious ${parsedRecipe.title} dish, photorealistic, high quality, food photography`;
-    const image = await generateImage(imagePrompt);
-
-    return NextResponse.json({ recipe: text, image });
+    return NextResponse.json({
+      recipe: recipeText,
+    });
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";
@@ -9,24 +10,29 @@ import {
   FireIcon,
   ExclamationTriangleIcon,
   TrashIcon,
+  HeartIcon,
 } from "@heroicons/react/24/outline";
 
 interface RecipeDisplayProps {
   recipe: string;
   image?: string;
+  imageLoading?: boolean;
   onDeleteFavorite?: (favoriteId: string) => void;
   favoriteId?: string;
   onAddToFavorites?: () => void;
   cuisine?: string;
+  onImageLoad?: () => void;
 }
 
 function RecipeDisplay({
   recipe,
   image,
+  imageLoading = false,
   onDeleteFavorite,
   favoriteId,
   onAddToFavorites,
   cuisine,
+  onImageLoad,
 }: RecipeDisplayProps) {
   const parsedRecipe = parseRecipe(recipe);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,150 +42,127 @@ function RecipeDisplay({
   };
 
   return (
-    <div className="mt-4 md:bg-white/80 md:backdrop-blur-sm md:rounded-3xl md:shadow-2xl md:border md:border-white/20 md:overflow-hidden">
-      <div className="relative h-48 md:h-56 overflow-hidden bg-slate-700">
-        {/* 背景图片 - 完全铺满标题栏 */}
-        {image ? (
+    <div className="mt-6 bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden animate-fadeIn">
+      <div className="relative h-64 md:h-80 overflow-hidden bg-slate-900">
+        {/* Background Image */}
+        {imageLoading ? (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-12 h-12 border-4 border-slate-600 border-t-orange-500 rounded-full animate-spin" />
+              <span className="text-slate-400 text-sm font-bold uppercase tracking-widest">正在为您描绘美味...</span>
+            </div>
+          </div>
+        ) : image ? (
           <Image
             src={image}
             alt={parsedRecipe.title || "食谱图片"}
             fill
-            className="object-cover object-center"
+            className="object-cover object-center opacity-60 hover:opacity-70 transition-opacity duration-500 cursor-pointer"
             priority
+            onLoad={onImageLoad}
+            onClick={handleImageClick}
           />
         ) : (
-          // 可选：无图时的渐变兜底背景
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600" />
+          <div className="absolute inset-0 bg-slate-800" />
         )}
 
-        {/* 左侧深色渐变遮罩，让文字始终清晰可见 */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-900/50 to-transparent" />
-
-        {/* 可点击的图片覆盖层 */}
-        {image && (
-          <div
-            className="absolute inset-0 z-20 cursor-pointer"
-            onClick={handleImageClick}
-            aria-label="查看大图"
-          />
-        )}
-
-        {/* 内容层 */}
-        <div className="relative z-10 flex items-center h-full px-6 md:px-8 max-w-7xl mx-auto">
-          <div className="max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 leading-tight drop-shadow-lg">
-              {parsedRecipe.title || "食谱"}
-            </h2>
-            <div className="flex items-center text-slate-100 text-lg drop-shadow-md">
-              <BookOpenIcon className="w-6 h-6 mr-2" />
-              {cuisine ? `${cuisine}美食` : "美味食谱"}
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex flex-col justify-end p-8 md:p-12 pointer-events-none">
+          <div className="max-w-3xl animate-slide-in">
+            <div className="inline-flex items-center px-3 py-1 bg-orange-500 text-white text-xs font-bold rounded-full mb-4 uppercase tracking-widest">
+              {cuisine || "精选美食"}
             </div>
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight tracking-tight">
+              {parsedRecipe.title || "美味食谱"}
+            </h2>
           </div>
         </div>
       </div>
 
-      <div className="p-4 md:p-8">
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Ingredients 左栏 */}
-          <div className="md:bg-gradient-to-br md:from-green-50 md:to-emerald-50 md:rounded-2xl md:p-6 md:border md:border-green-100 p-4 px-4">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mr-3">
-                <ClipboardDocumentListIcon className="w-6 h-6 text-white" />
+      <div className="p-6 md:p-12">
+        <div className="grid lg:grid-cols-12 gap-12">
+          {/* Ingredients Column */}
+          <div className="lg:col-span-5">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600">
+                <ClipboardDocumentListIcon className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800">配料清单</h3>
+              <h3 className="text-2xl font-bold text-slate-900">准备食材</h3>
             </div>
-            <div className="text-slate-700 leading-relaxed">
-              <ReactMarkdown
-                components={{
-                  p: ({ children }) => (
-                    <p className="text-slate-700 mb-3 leading-relaxed">
-                      {children}
-                    </p>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="space-y-2">{children}</ul>
-                  ),
-                  li: ({ children }) => (
-                    <li className="flex items-start text-slate-700">
-                      <span className="inline-block w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                      <span>{children}</span>
-                    </li>
-                  ),
-                }}
-              >
-                {parsedRecipe.ingredients}
-              </ReactMarkdown>
+            <div className="bg-slate-50/50 rounded-3xl p-8 border border-slate-100">
+              <div className="prose prose-slate max-w-none">
+                <ReactMarkdown
+                  components={{
+                    ul: ({ children }) => <ul className="space-y-4 m-0 p-0 list-none">{children}</ul>,
+                    li: ({ children }) => (
+                      <li className="flex items-start gap-3 text-slate-700 font-medium">
+                        <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2.5 flex-shrink-0" />
+                        <span>{children}</span>
+                      </li>
+                    ),
+                  }}
+                >
+                  {parsedRecipe.ingredients}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
 
-          {/* Method 右栏 */}
-          <div className="md:bg-gradient-to-br md:from-blue-50 md:to-indigo-50 md:rounded-2xl md:p-6 md:border md:border-blue-100 p-4 px-4">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mr-3">
-                <FireIcon className="w-6 h-6 text-white" />
+          {/* Instructions Column */}
+          <div className="lg:col-span-7">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                <FireIcon className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-800">制作方法</h3>
+              <h3 className="text-2xl font-bold text-slate-900">烹饪步骤</h3>
             </div>
-            <div className="text-slate-700 leading-relaxed">
-              <ol className="space-y-3">
-                {parsedRecipe.instructions
-                  .split("\n")
-                  .filter((line) => line.trim())
-                  .map((line, index) => {
-                    const stepText = line.replace(/^\d+\.\s*/, "").trim();
-                    return (
-                      <li
-                        key={index}
-                        className="flex items-start text-slate-700"
-                      >
-                        <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-500 text-white text-sm font-bold rounded-full mr-3 flex-shrink-0 mt-0.5">
+            <div className="space-y-6">
+              {parsedRecipe.instructions
+                .split("\n")
+                .filter((line) => line.trim())
+                .map((line, index) => {
+                  const stepText = line.replace(/^\d+\.\s*/, "").trim();
+                  return (
+                    <div key={index} className="flex gap-6 group">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-white border-2 border-slate-100 text-slate-400 font-black flex items-center justify-center group-hover:border-indigo-200 group-hover:text-indigo-500 transition-colors">
                           {index + 1}
-                        </span>
-                        <ReactMarkdown
-                          components={{
-                            p: ({ children }) => (
-                              <span className="leading-relaxed">
-                                {children}
-                              </span>
-                            ),
-                            strong: ({ children }) => (
-                              <strong className="font-bold">{children}</strong>
-                            ),
-                          }}
-                        >
-                          {stepText}
-                        </ReactMarkdown>
-                      </li>
-                    );
-                  })}
-              </ol>
+                        </div>
+                      </div>
+                      <div className="pt-1.5 flex-1">
+                        <div className="prose prose-slate max-w-none text-slate-700 leading-relaxed font-medium">
+                          <ReactMarkdown
+                            components={{
+                              p: ({ children }) => <span className="block">{children}</span>,
+                              strong: ({ children }) => <strong className="font-bold text-slate-900">{children}</strong>,
+                            }}
+                          >
+                            {stepText}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
             </div>
           </div>
         </div>
 
-        {/* Tips 栏 */}
+        {/* Tips Section */}
         {parsedRecipe.tips && (
-          <div className="md:bg-gradient-to-br md:from-amber-50 md:to-orange-50 md:rounded-2xl md:p-6 md:border md:border-amber-100 md:mt-8 mt-4 p-4 px-4">
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl flex items-center justify-center mr-3">
-                <ExclamationTriangleIcon className="w-6 h-6 text-white" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-800">小贴士</h3>
+          <div className="mt-12 bg-amber-50 rounded-3xl p-8 border border-amber-100">
+            <div className="flex items-center gap-3 mb-4 text-amber-800">
+              <ExclamationTriangleIcon className="w-6 h-6" />
+              <h4 className="text-xl font-bold">厨师心得</h4>
             </div>
-            <div className="text-slate-700 leading-relaxed">
+            <div className="text-amber-900/80 font-medium leading-relaxed">
               <ReactMarkdown
                 components={{
-                  p: ({ children }) => (
-                    <p className="text-slate-700 mb-3 leading-relaxed">
-                      {children}
-                    </p>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="space-y-2">{children}</ul>
-                  ),
+                  p: ({ children }) => <p className="mb-2">{children}</p>,
+                  ul: ({ children }) => <ul className="space-y-2">{children}</ul>,
                   li: ({ children }) => (
-                    <li className="flex items-start text-slate-700">
-                      <span className="inline-block w-2 h-2 bg-amber-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500">•</span>
                       <span>{children}</span>
                     </li>
                   ),
@@ -191,36 +174,24 @@ function RecipeDisplay({
           </div>
         )}
 
-        {/* 收藏和删除按钮 */}
-        <div className="md:mt-8 my-4 flex justify-center gap-4">
+        {/* Action Buttons */}
+        <div className="mt-12 flex flex-wrap justify-center gap-6">
           {onAddToFavorites && !favoriteId && (
             <button
               onClick={onAddToFavorites}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-10 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-200"
             >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-              收藏食谱
+              <HeartIcon className="w-6 h-6 mr-3 text-rose-500 fill-rose-500" />
+              收藏这份灵感
             </button>
           )}
           {onDeleteFavorite && favoriteId && (
             <button
               onClick={() => onDeleteFavorite(favoriteId)}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white font-semibold rounded-xl hover:from-red-600 hover:to-rose-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-10 py-4 bg-white text-rose-600 border-2 border-rose-50 font-bold rounded-2xl hover:bg-rose-50 hover:border-rose-100 transition-all duration-300"
             >
-              <TrashIcon className="w-5 h-5 mr-2" />
-              删除收藏
+              <TrashIcon className="w-6 h-6 mr-3" />
+              移除收藏
             </button>
           )}
         </div>

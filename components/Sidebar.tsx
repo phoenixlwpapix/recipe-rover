@@ -37,9 +37,8 @@ function Sidebar({
 
   return (
     <div
-      className={`${
-        isCollapsed ? "w-16" : "w-64"
-      } bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen flex flex-col border-r border-slate-200 transition-all duration-300`}
+      className={`${isCollapsed ? "w-16" : "w-64"
+        } bg-gradient-to-b from-slate-50 to-white shadow-xl h-screen flex flex-col border-r border-slate-200 transition-all duration-300`}
     >
       <div className="py-8 px-6">
         <div className="flex items-center justify-between mb-10 pb-6 border-b border-slate-400">
@@ -80,41 +79,40 @@ function Sidebar({
               )}
             </div>
           )}
+          {!isCollapsed && (
+            <p className="text-sm text-slate-500 italic mt-2">探索世界，一味一旅</p>
+          )}
         </div>
         {!isCollapsed && (
           <nav className="space-y-3">
             <button
               onClick={() => onTabChange("ingredients")}
-              className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                activeTab === "ingredients"
+              className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === "ingredients"
                   ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25"
                   : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-              }`}
+                }`}
             >
               <CubeIcon
-                className={`w-5 h-5 mr-3 transition-colors ${
-                  activeTab === "ingredients"
+                className={`w-5 h-5 mr-3 transition-colors ${activeTab === "ingredients"
                     ? "text-white"
                     : "text-slate-500 group-hover:text-slate-700"
-                }`}
+                  }`}
               />
               <span>我的食材库</span>
             </button>
             <div className="relative">
               <button
                 onClick={() => onTabChange("favorites")}
-                className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
-                  activeTab === "favorites"
+                className={`group w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 ${activeTab === "favorites"
                     ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-800"
-                }`}
+                  }`}
               >
                 <HeartIcon
-                  className={`w-5 h-5 mr-3 transition-colors ${
-                    activeTab === "favorites"
+                  className={`w-5 h-5 mr-3 transition-colors ${activeTab === "favorites"
                       ? "text-white"
                       : "text-slate-500 group-hover:text-slate-700"
-                  }`}
+                    }`}
                 />
                 <span>我的收藏</span>
               </button>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { db } from "../db/instant";
 import { id } from "@instantdb/react";
@@ -27,18 +28,15 @@ interface IngredientsPanelProps {
   selectedCuisine: string;
   onCuisineChange: (cuisine: string) => void;
   ingredients: Ingredient[];
+  compactMode?: boolean;
 }
 
 function IngredientsPanel({
   selectedIngredients,
   onToggleIngredient,
   onDeleteIngredient,
-  onGenerateRecipe,
   onClearSelectedIngredients,
-  loading,
-  loadingType,
-  selectedCuisine,
-  onCuisineChange,
+  compactMode = false,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
@@ -58,13 +56,37 @@ function IngredientsPanel({
     "印度菜",
   ];
 
-  const categoryColors: Record<string, string> = {
-    肉类: "bg-red-100",
-    蔬菜: "bg-green-100",
-    蛋白质: "bg-yellow-100",
-    乳制品: "bg-blue-100",
-    调料: "bg-purple-100",
-    其他: "bg-gray-100",
+  const categoryStyles: Record<string, { container: string, badge: string, dot: string }> = {
+    肉类: {
+      container: "bg-rose-50/50 border-rose-100 hover:border-rose-200",
+      badge: "bg-rose-100 text-rose-700 border-rose-200",
+      dot: "bg-rose-500"
+    },
+    蔬菜: {
+      container: "bg-emerald-50/50 border-emerald-100 hover:border-emerald-200",
+      badge: "bg-emerald-100 text-emerald-700 border-emerald-200",
+      dot: "bg-emerald-500"
+    },
+    蛋白质: {
+      container: "bg-amber-50/50 border-amber-100 hover:border-amber-200",
+      badge: "bg-amber-100 text-amber-700 border-amber-200",
+      dot: "bg-amber-500"
+    },
+    乳制品: {
+      container: "bg-sky-50/50 border-sky-100 hover:border-sky-200",
+      badge: "bg-sky-100 text-sky-700 border-sky-200",
+      dot: "bg-sky-500"
+    },
+    调料: {
+      container: "bg-violet-50/50 border-violet-100 hover:border-violet-200",
+      badge: "bg-violet-100 text-violet-700 border-violet-200",
+      dot: "bg-violet-500"
+    },
+    其他: {
+      container: "bg-slate-50/50 border-slate-100 hover:border-slate-200",
+      badge: "bg-slate-100 text-slate-700 border-slate-200",
+      dot: "bg-slate-500"
+    },
   };
 
   const user = db.useUser();
@@ -128,133 +150,135 @@ function IngredientsPanel({
   };
 
   return (
-    <div className="space-y-8">
-      {/* 配料表 */}
+    <div className="space-y-10">
+      {/* List section */}
       <div>
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold text-slate-800">食材选择</h3>
-            <div className="flex gap-2">
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">我的食材库</h3>
+              <p className="text-slate-500 mt-1">选择您现有的食材，生成美味食谱</p>
+            </div>
+            <div className="flex items-center gap-3">
               {!showAddForm && (
                 <button
                   onClick={() => setIsEditMode(!isEditMode)}
-                  className={`inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ${
-                    isEditMode
-                      ? "bg-gradient-to-r from-red-500 to-rose-500 text-white hover:from-red-600 hover:to-rose-600"
-                      : "bg-gradient-to-r from-slate-500 to-slate-600 text-white hover:from-slate-600 hover:to-slate-700"
-                  }`}
+                  className={`inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 border ${isEditMode
+                    ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
+                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
                 >
-                  <PencilIcon className="w-3.5 h-3.5 mr-1.5" />
-                  {isEditMode ? "退出编辑" : "编辑食材"}
+                  <PencilIcon className="w-4 h-4 mr-2" />
+                  {isEditMode ? "完成" : "管理食材"}
                 </button>
               )}
               {!showAddForm && (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="inline-flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-4 py-2 text-sm bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition-all duration-200 shadow-sm shadow-orange-200"
                 >
-                  <PlusIcon className="w-3.5 h-3.5 mr-1.5" />
+                  <PlusIcon className="w-4 h-4 mr-2" />
                   添加食材
                 </button>
               )}
             </div>
           </div>
 
-          {/* 选中的食材 */}
-          {selectedIngredients.length > 0 && (
-            <div className="mb-4">
-              <div className="flex flex-wrap gap-2 items-center">
+          {/* Selected items display - hidden in compact mode */}
+          {!compactMode && selectedIngredients.length > 0 && (
+            <div className="mb-8 p-4 bg-orange-50 rounded-2xl border border-orange-100 transition-all animate-fadeIn">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-bold text-orange-800 uppercase tracking-wider">已选食材 ({selectedIngredients.length})</span>
+                <button
+                  onClick={onClearSelectedIngredients}
+                  className="text-xs font-bold text-orange-600 hover:text-orange-800 transition-colors uppercase"
+                >
+                  重置选择
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
                 {selectedIngredients.map((ing) => (
                   <span
                     key={ing}
-                    className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 font-medium rounded-lg border border-blue-300/50 shadow-sm text-sm"
+                    className="inline-flex items-center px-3 py-1.5 bg-white text-orange-700 font-medium rounded-lg border border-orange-200 shadow-sm text-sm"
                   >
-                    <CheckIcon className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                    <CheckIcon className="w-3.5 h-3.5 mr-1.5 text-orange-600" />
                     {ing}
                   </span>
                 ))}
-                <button
-                  onClick={onClearSelectedIngredients}
-                  className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-red-500 to-rose-500 text-white text-sm font-semibold rounded-lg hover:from-red-600 hover:to-rose-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl ml-2"
-                >
-                  <TrashIcon className="w-3.5 h-3.5 mr-1" />
-                  清空
-                </button>
               </div>
             </div>
           )}
         </div>
+
         {ingredientsLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600"></div>
-            <p className="mt-4 text-slate-600">加载中...</p>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-500 rounded-full animate-spin"></div>
+            <p className="mt-4 text-slate-400 font-medium">加载中...</p>
           </div>
         ) : allIngredients.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-32 h-32 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full mx-auto mb-6 flex items-center justify-center">
-              <ShieldCheckIcon className="w-16 h-16 text-slate-500" />
+          <div className="text-center py-20 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200">
+            <div className="w-20 h-20 bg-white rounded-2xl mx-auto mb-6 flex items-center justify-center shadow-sm">
+              <ShieldCheckIcon className="w-10 h-10 text-slate-300" />
             </div>
-            <h3 className="text-xl font-semibold text-slate-700 mb-2">
-              食材库是空的
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              暂无食材
             </h3>
-            <p className="text-slate-500 mb-6">开始添加食材，创造美味食谱吧</p>
+            <p className="text-slate-500 mb-8 max-w-sm mx-auto">您的食材库还是空的。您可以手动添加，或是一键导入常用食材。</p>
             <button
               onClick={handleImportCommonIngredients}
-              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="inline-flex items-center px-6 py-3 bg-white text-slate-900 border border-slate-200 font-bold rounded-2xl hover:bg-slate-50 transition-all duration-200 shadow-sm"
             >
-              <PlusIcon className="w-5 h-5 mr-2" />
-              一键导入常见食材
+              <PlusIcon className="w-5 h-5 mr-2 text-orange-500" />
+              导入常用食材
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {["肉类", "蔬菜", "蛋白质", "乳制品", "调料", "其他"].map(
               (category) => {
                 const categoryIngredients = allIngredients.filter(
                   (ing) => ing.category === category
                 );
                 if (categoryIngredients.length === 0) return null;
+                const styles = categoryStyles[category] || categoryStyles.其他;
                 return (
                   <div
                     key={category}
-                    className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg"
+                    className={`rounded-[2rem] p-6 border-2 transition-all duration-300 ${styles.container}`}
                   >
-                    <div className="flex items-center gap-4 mb-3">
-                      <div
-                        className={`text-base font-semibold text-slate-800 whitespace-nowrap min-w-0 flex-shrink-0 px-3 py-1.5 rounded-lg shadow-md ${
-                          categoryColors[category] || "bg-gray-100"
-                        }`}
-                      >
-                        {category}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${styles.dot} animate-pulse`}></span>
+                        <div className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest border ${styles.badge}`}>
+                          {category}
+                        </div>
                       </div>
-                      <div className="text-sm text-slate-600">
-                        {categoryIngredients.length} 个食材
-                      </div>
+                      <span className="text-xs font-bold bg-white/50 px-2 py-1 rounded-lg text-slate-500 border border-slate-100">
+                        {categoryIngredients.length}
+                      </span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2.5">
                       {categoryIngredients.map((ing) => (
-                        <div key={ing.id} className="relative">
+                        <div key={ing.id} className="relative group/ing">
                           <button
                             onClick={() => onToggleIngredient(ing.name)}
-                            className={`inline-flex items-center px-3 py-1.5 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${
-                              selectedIngredients.includes(ing.name)
-                                ? "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25 transform scale-105"
-                                : "bg-white/80 backdrop-blur-sm border-slate-300 hover:border-slate-400 hover:bg-white hover:shadow-md text-slate-700 hover:text-slate-800"
-                            }`}
+                            className={`inline-flex items-center px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 border-2 ${selectedIngredients.includes(ing.name)
+                              ? "bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-200 scale-[1.02]"
+                              : "bg-white/80 border-transparent text-slate-600 hover:bg-white hover:border-slate-200 hover:text-slate-900 hover:shadow-sm"
+                              }`}
                           >
-                            <span className="whitespace-nowrap">
-                              {ing.name}
-                            </span>
+                            {ing.name}
                           </button>
                           {isEditMode && (
                             <button
                               onClick={() =>
                                 onDeleteIngredient(ing.id, ing.name)
                               }
-                              className="absolute -top-2 -right-2 w-5 h-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-full hover:from-red-600 hover:to-rose-600 text-xs flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200"
-                              title="删除食材"
+                              className="absolute -top-2 -right-2 w-7 h-7 bg-white border-2 border-rose-100 text-rose-500 rounded-full hover:bg-rose-50 hover:border-rose-200 flex items-center justify-center shadow-xl transition-all scale-0 group-hover/ing:scale-100 z-10"
+                              title="删除"
                             >
-                              ×
+                              <XMarkIcon className="w-4 h-4" />
                             </button>
                           )}
                         </div>
@@ -267,16 +291,17 @@ function IngredientsPanel({
           </div>
         )}
 
-        {/* 添加新食材 */}
+        {/* Form to add item */}
         {showAddForm && (
-          <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
+          <div className="bg-white rounded-3xl p-6 border-2 border-orange-100 shadow-xl shadow-orange-50/50 mb-10 animate-scaleIn">
+            <h4 className="text-lg font-bold text-slate-900 mb-4">添加新食材</h4>
+            <div className="flex flex-col md:flex-row gap-4">
               <input
                 type="text"
                 value={newIngredient}
                 onChange={(e) => setNewIngredient(e.target.value)}
-                placeholder="食材名称..."
-                className="flex-1 border border-slate-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black bg-white/80 backdrop-blur-sm transition-all duration-200"
+                placeholder="例如：西蓝花..."
+                className="flex-1 border border-slate-200 px-5 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-900 bg-slate-50/50 transition-all font-medium"
                 onKeyDown={(e) => e.key === "Enter" && handleAddIngredient()}
                 autoFocus
               />
@@ -284,7 +309,7 @@ function IngredientsPanel({
                 <select
                   value={newIngredientCategory}
                   onChange={(e) => setNewIngredientCategory(e.target.value)}
-                  className="border border-slate-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black bg-white/80 backdrop-blur-sm transition-all duration-200"
+                  className="border border-slate-200 px-4 py-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-slate-700 bg-slate-50/50 transition-all font-medium appearance-none cursor-pointer"
                 >
                   <option value="肉类">肉类</option>
                   <option value="蔬菜">蔬菜</option>
@@ -295,9 +320,10 @@ function IngredientsPanel({
                 </select>
                 <button
                   onClick={handleAddIngredient}
-                  className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-bold rounded-2xl hover:bg-orange-700 transition-all shadow-sm shadow-orange-200 disabled:opacity-50"
+                  disabled={!newIngredient.trim()}
                 >
-                  <CheckIcon className="w-4 h-4 mr-2" />
+                  <PlusIcon className="w-5 h-5 mr-1" />
                   添加
                 </button>
                 <button
@@ -305,9 +331,8 @@ function IngredientsPanel({
                     setShowAddForm(false);
                     setNewIngredient("");
                   }}
-                  className="inline-flex items-center px-6 py-3 bg-slate-500 text-white font-semibold rounded-xl hover:bg-slate-600 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all"
                 >
-                  <XMarkIcon className="w-4 h-4 mr-2" />
                   取消
                 </button>
               </div>
@@ -315,112 +340,45 @@ function IngredientsPanel({
           </div>
         )}
 
-        {/* 菜系选择 */}
-        <div className="mb-8">
-          <label className="block text-xl font-semibold text-slate-800 mb-4">
-            菜系选择
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {cuisines.map((cuisine) => (
-              <button
-                key={cuisine}
-                onClick={() => onCuisineChange(cuisine)}
-                className={`px-3 py-2 rounded-lg border-2 text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                  selectedCuisine === cuisine
-                    ? "bg-gradient-to-r from-blue-500 to-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25 transform scale-105"
-                    : "bg-white/80 backdrop-blur-sm border-slate-300 hover:border-slate-400 hover:bg-white hover:shadow-md text-slate-700 hover:text-slate-800"
-                }`}
-              >
-                {cuisine}
-              </button>
-            ))}
+        {/* Cuisine section - hidden in compact mode */}
+        {!compactMode && (
+          <div className="mb-12">
+            <label className="block text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              我的偏好
+              <span className="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">选择菜系</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {["中国菜", "法国菜", "意大利菜", "日本菜", "东南亚菜", "希腊菜", "美国菜", "墨西哥菜", "韩国菜", "印度菜"].map((cuisine) => (
+                <button
+                  key={cuisine}
+                  className="px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-200 bg-white text-slate-600 border border-slate-100 hover:border-slate-300 hover:bg-slate-50"
+                >
+                  {cuisine}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <button
-            onClick={() => onGenerateRecipe()}
-            disabled={loading || selectedIngredients.length === 0}
-            className={`inline-flex items-center justify-center px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg ${
-              loading || selectedIngredients.length === 0
-                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transform hover:scale-105 hover:shadow-xl"
-            }`}
-          >
-            {loading && loadingType === "manual" ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                生成中...
-              </>
-            ) : (
-              <>
-                <BoltIcon className="w-5 h-5 mr-2" />
-                生成菜谱
-              </>
-            )}
-          </button>
-          <button
-            onClick={async () => {
-              // Always clear previous selections first
-              onClearSelectedIngredients();
-
-              if (allIngredients.length > 0) {
-                // 1. Pick one main meat (if exists)
-                const meats = allIngredients.filter(
-                  (i: Ingredient) => i.category === "肉类"
-                );
-                if (meats.length === 0) return; // do nothing if no meat
-                const mainMeat =
-                  meats[Math.floor(Math.random() * meats.length)].name;
-
-                // 2. Pick up to four non-meat, unique additional ingredients
-                const nonMeat = allIngredients.filter(
-                  (i: Ingredient) =>
-                    i.category !== "肉类" && i.name !== mainMeat
-                );
-                const shuffle = (arr: Ingredient[]) =>
-                  [...arr].sort(() => Math.random() - 0.5);
-                const randomOthers = shuffle(nonMeat)
-                  .slice(0, Math.min(4, nonMeat.length))
-                  .map((i) => i.name);
-                const picks = [mainMeat, ...randomOthers];
-
-                // 3. Select all (skip if less than one other ingredient)
-                if (picks.length < 2) return; // need at least meat plus one more
-
-                // 4. Pick a random cuisine
-                const randomCuisine =
-                  cuisines[Math.floor(Math.random() * cuisines.length)];
-                onCuisineChange(randomCuisine);
-
-                picks.forEach((name) => onToggleIngredient(name));
-                // Wait zero tick for state to fully reflect (ensures onGenerateRecipe gets all)
-                setTimeout(() => {
-                  onGenerateRecipe(picks, "random");
-                }, 0);
-                return;
-              }
-            }}
-            disabled={loading || allIngredients.length === 0}
-            className={`inline-flex items-center justify-center px-8 py-4 font-semibold rounded-xl transition-all duration-200 shadow-lg ${
-              loading || allIngredients.length === 0
-                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-purple-500 to-violet-500 text-white hover:from-purple-600 hover:to-violet-600 transform hover:scale-105 hover:shadow-xl"
-            }`}
-          >
-            {loading && loadingType === "random" ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                生成中...
-              </>
-            ) : (
-              <>
-                <StarIcon className="w-5 h-5 mr-2" />
-                手气不错
-              </>
-            )}
-          </button>
-        </div>
+        {/* Action buttons - hidden in compact mode */}
+        {!compactMode && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              className="group inline-flex items-center justify-center px-8 py-5 font-bold rounded-3xl transition-all duration-300 shadow-xl bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+              disabled
+            >
+              <BoltIcon className="w-6 h-6 mr-3" />
+              立即生成精选食谱
+            </button>
+            <button
+              className="group inline-flex items-center justify-center px-8 py-5 font-bold rounded-3xl transition-all duration-300 shadow-xl border-2 bg-white text-slate-300 border-slate-100 cursor-not-allowed"
+              disabled
+            >
+              <StarIcon className="w-6 h-6 mr-3 text-indigo-300" />
+              手气不错，随机灵感
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
