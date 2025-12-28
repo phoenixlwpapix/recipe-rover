@@ -28,7 +28,6 @@ function SignedInContent() {
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
   const [selectedRecipeCuisine, setSelectedRecipeCuisine] = useState<string | undefined>(undefined);
-  const [favoriteImageLoading, setFavoriteImageLoading] = useState(false);
 
   // Common Loading States
   const [loading, setLoading] = useState(false);
@@ -317,9 +316,7 @@ function SignedInContent() {
     setRecipeImage(image);
     setSelectedRecipeCuisine(cuisine);
 
-    if (image) {
-      setFavoriteImageLoading(true);
-    }
+
 
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -529,7 +526,6 @@ function SignedInContent() {
                   onDeleteFavorite={deleteFavorite}
                   favoriteId={selectedRecipeId || undefined}
                   cuisine={selectedRecipeCuisine}
-                  onImageLoad={() => setFavoriteImageLoading(false)}
                 />
               </div>
             ) : (

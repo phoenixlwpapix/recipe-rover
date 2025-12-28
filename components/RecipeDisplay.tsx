@@ -5,7 +5,6 @@ import Image from "next/image";
 import { parseRecipe } from "../utils/recipeParser";
 import ImageModal from "./ImageModal";
 import {
-  BookOpenIcon,
   ClipboardDocumentListIcon,
   FireIcon,
   ExclamationTriangleIcon,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowRight, Utensils, Sparkles, Globe, Heart, Camera } from "lucide-react";
+import { ArrowRight, Utensils, Sparkles, Globe, Heart } from "lucide-react";
 
 interface LandingPageProps {
     onGetStarted: () => void;

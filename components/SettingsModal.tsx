@@ -1,13 +1,19 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import Image from "next/image";
 import { db } from "../db/instant";
-import { User, Mail, LogOut, Camera, X, Loader2 } from "lucide-react";
+import { Mail, LogOut, Camera, X, Loader2 } from "lucide-react";
+
+interface InstantUser {
+    id: string;
+    email?: string | null;
+}
 
 interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
-    user: any;
+    user: InstantUser | null | undefined;
     onLogout: () => void;
 }
 
@@ -80,9 +86,9 @@ export default function SettingsModal({ isOpen, onClose, user, onLogout }: Setti
                     {/* Avatar Section */}
                     <div className="flex flex-col items-center gap-4">
                         <div className="relative group">
-                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center text-3xl font-black text-orange-600 overflow-hidden border-4 border-white shadow-xl">
+                            <div className="w-24 h-24 rounded-[2rem] bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center text-3xl font-black text-orange-600 overflow-hidden border-4 border-white shadow-xl relative">
                                 {avatarUrl ? (
-                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    <Image src={avatarUrl} alt="Avatar" fill className="object-cover" sizes="96px" />
                                 ) : (
                                     userInitial
                                 )}

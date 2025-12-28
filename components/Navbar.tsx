@@ -1,12 +1,18 @@
 import React from 'react';
-import { Sparkles, Heart, Utensils, User as UserIcon } from 'lucide-react';
+import Image from 'next/image';
+import { Sparkles, Heart, Utensils } from 'lucide-react';
 import { db } from '../db/instant';
+
+interface InstantUser {
+    id: string;
+    email?: string | null;
+}
 
 interface NavbarProps {
     activeTab: 'ingredients' | 'favorites';
     onTabChange: (tab: 'ingredients' | 'favorites') => void;
     onOpenSettings: () => void;
-    user: any;
+    user: InstantUser | null | undefined;
 }
 
 export default function Navbar({ activeTab, onTabChange, onOpenSettings, user }: NavbarProps) {
@@ -71,9 +77,9 @@ export default function Navbar({ activeTab, onTabChange, onOpenSettings, user }:
                             className="flex items-center gap-2 p-1.5 pr-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-all duration-300 group"
                             title="用户设置"
                         >
-                            <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden shadow-sm">
+                            <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden shadow-sm relative">
                                 {avatarUrl ? (
-                                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    <Image src={avatarUrl} alt="Avatar" fill className="object-cover" sizes="32px" />
                                 ) : (
                                     userInitial
                                 )}

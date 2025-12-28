@@ -7,7 +7,6 @@ import {
   PencilIcon,
   PlusIcon,
   CheckIcon,
-  TrashIcon,
   ShieldCheckIcon,
   BoltIcon,
   StarIcon,
@@ -42,19 +41,6 @@ function IngredientsPanel({
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
   const [showAddForm, setShowAddForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
-
-  const cuisines = [
-    "中国菜",
-    "法国菜",
-    "意大利菜",
-    "日本菜",
-    "东南亚菜",
-    "希腊菜",
-    "美国菜",
-    "墨西哥菜",
-    "韩国菜",
-    "印度菜",
-  ];
 
   const categoryStyles: Record<string, { container: string, badge: string, dot: string }> = {
     肉类: {
