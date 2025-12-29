@@ -12,6 +12,7 @@
   --font-mono: var(--font-geist-mono);
   --animate-fadeIn: fadeIn 0.25s ease-out;
   --animate-scaleIn: scaleIn 0.25s ease-out;
+  --animate-wiggle-subtle: wiggleSubtle 0.3s ease-in-out infinite;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -46,6 +47,11 @@ body {
   }
 }
 
+@keyframes wiggleSubtle {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -60,3 +66,4 @@ body {
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
 }
+

@@ -2,6 +2,8 @@
 
 import React from "react";
 import { ArrowRight, Utensils, Sparkles, Globe, Heart } from "lucide-react";
+import Footer from "./Footer";
+
 
 interface LandingPageProps {
     onGetStarted: () => void;
@@ -154,20 +156,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 border-t border-slate-100">
-                <div className="max-w-7xl mx-auto px-4 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-6">
-                        <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-lg">
-                            <Utensils className="text-white w-5 h-5" />
-                        </div>
-                        <span className="text-lg font-bold text-slate-900">食旅星球</span>
-                    </div>
-                    <p className="text-slate-500 text-sm">
-                        © 2025 Recipe Rover. Inspired by global flavors. Built with AI.
-                    </p>
-                </div>
-            </footer>
+            <Footer />
 
             <style jsx global>{`
         @keyframes bounce-slow {

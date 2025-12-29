@@ -16,6 +16,8 @@ import Toast from "../components/Toast";
 import { parseRecipe } from "../utils/recipeParser";
 import { base64ToFile } from "../utils/imageUtils";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import Footer from "../components/Footer";
+
 
 function SignedInContent() {
   const [activeTab, setActiveTab] = useState<"ingredients" | "favorites">("ingredients");
@@ -36,6 +38,7 @@ function SignedInContent() {
 
   // Settings Modal State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isIngredientEditMode, setIsIngredientEditMode] = useState(false);
 
   // UI States
   const [confirmModal, setConfirmModal] = useState<{
@@ -356,12 +359,13 @@ function SignedInContent() {
                     onCuisineChange={setSelectedCuisine}
                     ingredients={ingredients}
                     compactMode={true}
+                    onEditModeChange={setIsIngredientEditMode}
                   />
                 </section>
               </div>
 
               {/* Right Column - Action Panel */}
-              <div className="lg:w-2/5 xl:w-1/3">
+              <div className={`lg:w-2/5 xl:w-1/3 transition-all duration-500 ${isIngredientEditMode ? "opacity-30 pointer-events-none scale-[0.98] blur-[1px]" : ""}`}>
                 {/* Sticky Action Panel */}
                 <div className="lg:sticky lg:top-24">
                   <section className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 p-6 transition-all">
@@ -576,7 +580,9 @@ function SignedInContent() {
         user={user}
         onLogout={() => db.auth.signOut()}
       />
+      <Footer />
     </div>
+
   );
 }
 

@@ -22,6 +22,7 @@ interface IngredientsPanelProps {
     type?: "manual" | "random"
   ) => void;
   onClearSelectedIngredients: () => void;
+  onEditModeChange?: (isEdit: boolean) => void;
   loading: boolean;
   loadingType?: "manual" | "random";
   selectedCuisine: string;
@@ -35,12 +36,22 @@ function IngredientsPanel({
   onToggleIngredient,
   onDeleteIngredient,
   onClearSelectedIngredients,
+  onEditModeChange,
   compactMode = false,
 }: IngredientsPanelProps) {
   const [newIngredient, setNewIngredient] = useState("");
   const [newIngredientCategory, setNewIngredientCategory] = useState("肉类");
   const [showAddForm, setShowAddForm] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+
+  const toggleEditMode = () => {
+    const nextMode = !isEditMode;
+    setIsEditMode(nextMode);
+    onEditModeChange?.(nextMode);
+    if (nextMode) {
+      setShowAddForm(false);
+    }
+  };
 
   const categoryStyles: Record<string, { container: string, badge: string, dot: string }> = {
     肉类: {
@@ -136,7 +147,7 @@ function IngredientsPanel({
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 focus:outline-none" tabIndex={-1}>
       {/* List section */}
       <div>
         <div className="mb-8">
@@ -148,17 +159,17 @@ function IngredientsPanel({
             <div className="flex items-center gap-3">
               {!showAddForm && (
                 <button
-                  onClick={() => setIsEditMode(!isEditMode)}
-                  className={`inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 border ${isEditMode
-                    ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                  onClick={toggleEditMode}
+                  className={`inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl transition-all duration-200 border shadow-sm ${isEditMode
+                    ? "bg-rose-600 text-white border-rose-600 hover:bg-rose-700 shadow-rose-200"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                     }`}
                 >
                   <PencilIcon className="w-4 h-4 mr-2" />
-                  {isEditMode ? "完成" : "管理食材"}
+                  {isEditMode ? "完成管理" : "管理食材"}
                 </button>
               )}
-              {!showAddForm && (
+              {!showAddForm && !isEditMode && (
                 <button
                   onClick={() => setShowAddForm(true)}
                   className="inline-flex items-center px-4 py-2 text-sm bg-orange-600 text-white font-semibold rounded-xl hover:bg-orange-700 transition-all duration-200 shadow-sm shadow-orange-200"
@@ -171,7 +182,7 @@ function IngredientsPanel({
           </div>
 
           {/* Selected items display - hidden in compact mode */}
-          {!compactMode && selectedIngredients.length > 0 && (
+          {!compactMode && selectedIngredients.length > 0 && !isEditMode && (
             <div className="mb-8 p-4 bg-orange-50 rounded-2xl border border-orange-100 transition-all animate-fadeIn">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-bold text-orange-800 uppercase tracking-wider">已选食材 ({selectedIngredients.length})</span>
@@ -231,11 +242,11 @@ function IngredientsPanel({
                 return (
                   <div
                     key={category}
-                    className={`rounded-[2rem] p-6 border-2 transition-all duration-300 ${styles.container}`}
+                    className={`rounded-[2rem] p-6 border-2 transition-all duration-300 ${styles.container} ${isEditMode ? "shadow-inner border-slate-200" : ""}`}
                   >
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${styles.dot} animate-pulse`}></span>
+                        <span className={`w-2 h-2 rounded-full ${styles.dot} ${isEditMode ? "" : "animate-pulse"}`}></span>
                         <div className={`px-3 py-1 rounded-xl text-xs font-bold uppercase tracking-widest border ${styles.badge}`}>
                           {category}
                         </div>
@@ -248,25 +259,19 @@ function IngredientsPanel({
                       {categoryIngredients.map((ing) => (
                         <div key={ing.id} className="relative group/ing">
                           <button
-                            onClick={() => onToggleIngredient(ing.name)}
-                            className={`inline-flex items-center px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 border-2 ${selectedIngredients.includes(ing.name)
-                              ? "bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-200 scale-[1.02]"
-                              : "bg-white/80 border-transparent text-slate-600 hover:bg-white hover:border-slate-200 hover:text-slate-900 hover:shadow-sm"
+                            onClick={() => isEditMode ? onDeleteIngredient(ing.id, ing.name) : onToggleIngredient(ing.name)}
+                            className={`inline-flex items-center px-4 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 border-2 ${isEditMode
+                              ? "bg-white border-slate-200 text-slate-600 hover:border-slate-300 animate-wiggle-subtle shadow-sm"
+                              : selectedIngredients.includes(ing.name)
+                                ? "bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-200 scale-[1.02]"
+                                : "bg-white/80 border-transparent text-slate-600 hover:bg-white hover:border-slate-200 hover:text-slate-900 hover:shadow-sm"
                               }`}
                           >
                             {ing.name}
+                            {isEditMode && (
+                              <XMarkIcon className="w-4 h-4 ml-2 text-slate-400" />
+                            )}
                           </button>
-                          {isEditMode && (
-                            <button
-                              onClick={() =>
-                                onDeleteIngredient(ing.id, ing.name)
-                              }
-                              className="absolute -top-2 -right-2 w-7 h-7 bg-white border-2 border-rose-100 text-rose-500 rounded-full hover:bg-rose-50 hover:border-rose-200 flex items-center justify-center shadow-xl transition-all scale-0 group-hover/ing:scale-100 z-10"
-                              title="删除"
-                            >
-                              <XMarkIcon className="w-4 h-4" />
-                            </button>
-                          )}
                         </div>
                       ))}
                     </div>
@@ -278,7 +283,7 @@ function IngredientsPanel({
         )}
 
         {/* Form to add item */}
-        {showAddForm && (
+        {showAddForm && !isEditMode && (
           <div className="bg-white rounded-3xl p-6 border-2 border-orange-100 shadow-xl shadow-orange-50/50 mb-10 animate-scaleIn">
             <h4 className="text-lg font-bold text-slate-900 mb-4">添加新食材</h4>
             <div className="flex flex-col md:flex-row gap-4">
@@ -327,7 +332,7 @@ function IngredientsPanel({
         )}
 
         {/* Cuisine section - hidden in compact mode */}
-        {!compactMode && (
+        {!compactMode && !isEditMode && (
           <div className="mb-12">
             <label className="block text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
               我的偏好
@@ -347,7 +352,7 @@ function IngredientsPanel({
         )}
 
         {/* Action buttons - hidden in compact mode */}
-        {!compactMode && (
+        {!compactMode && !isEditMode && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <button
               className="group inline-flex items-center justify-center px-8 py-5 font-bold rounded-3xl transition-all duration-300 shadow-xl bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
