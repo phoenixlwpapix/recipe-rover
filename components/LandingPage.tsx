@@ -21,7 +21,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                                 <Utensils className="text-white w-6 h-6" />
                             </div>
                             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                                食旅星球 <span className="text-orange-600">Rover</span>
+                                食旅星球 <span className="text-orange-600">Recipe Rover</span>
                             </span>
                         </div>
                         <div className="hidden md:flex items-center gap-8">

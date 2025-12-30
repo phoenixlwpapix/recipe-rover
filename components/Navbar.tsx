@@ -40,7 +40,7 @@ export default function Navbar({ activeTab, onTabChange, onOpenSettings, user }:
                             <Utensils className="text-white w-6 h-6" />
                         </div>
                         <h1 className="ml-3 text-xl font-black text-slate-900 tracking-tight hidden sm:block">
-                            食旅星球 <span className="text-orange-600">Rover</span>
+                            食旅星球 <span className="text-orange-600">Recipe Rover</span>
                         </h1>
                     </div>
 

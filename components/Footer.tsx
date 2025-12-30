@@ -15,7 +15,7 @@ export default function Footer() {
                                 <Utensils className="text-white w-6 h-6" />
                             </div>
                             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
-                                食旅星球 <span className="text-orange-600">Rover</span>
+                                食旅星球 <span className="text-orange-600">Recipe Rover</span>
                             </span>
                         </div>
                         <p className="text-slate-500 text-sm leading-relaxed max-w-xs">

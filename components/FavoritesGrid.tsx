@@ -105,7 +105,7 @@ export default function FavoritesGrid({
 
                             {/* Cuisine Badge */}
                             {cuisine && (
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md text-slate-900 text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl shadow-lg">
+                                <div className="absolute top-4 left-4 bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
                                     {cuisine}
                                 </div>
                             )}

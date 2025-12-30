@@ -45,12 +45,13 @@ function RecipeDisplay({
       <div className="relative h-64 md:h-80 overflow-hidden bg-slate-900">
         {/* Background Image */}
         {imageLoading ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-800">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 border-4 border-slate-600 border-t-orange-500 rounded-full animate-spin" />
-              <span className="text-slate-400 text-sm font-bold uppercase tracking-widest">正在为您描绘美味...</span>
+          <>
+            <div className="absolute inset-0 bg-slate-800" />
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-3 px-4 py-2 bg-slate-900/80 backdrop-blur-sm rounded-full border border-slate-700">
+              <div className="w-5 h-5 border-2 border-slate-600 border-t-orange-500 rounded-full animate-spin" />
+              <span className="text-slate-300 text-xs font-medium">正在为您描绘美味...</span>
             </div>
-          </div>
+          </>
         ) : image ? (
           <Image
             src={image}
