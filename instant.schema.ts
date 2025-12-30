@@ -27,6 +27,11 @@ const _schema = i.schema({
     favorites: i.entity({
       createdAt: i.number().indexed(),
     }),
+    // 分享到灵感广场的食谱
+    sharedRecipes: i.entity({
+      sharedAt: i.number().indexed(),
+      description: i.string().optional(), // 用户分享时添加的描述
+    }),
   },
   links: {
     userFavorites: {
@@ -46,6 +51,16 @@ const _schema = i.schema({
     userAvatar: {
       forward: { on: "$users", has: "one", label: "$file" },
       reverse: { on: "$files", has: "one", label: "user" },
+    },
+    // 分享食谱关联 - 一个分享对应一个食谱
+    sharedRecipeLink: {
+      forward: { on: "sharedRecipes", has: "one", label: "recipe" },
+      reverse: { on: "recipes", has: "many", label: "shares" },
+    },
+    // 分享食谱与用户关联
+    sharedRecipeUser: {
+      forward: { on: "sharedRecipes", has: "one", label: "user" },
+      reverse: { on: "$users", has: "many", label: "sharedRecipes" },
     },
   },
 });

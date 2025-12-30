@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { Sparkles, Heart, Utensils } from 'lucide-react';
+import { Sparkles, Heart, Utensils, Globe } from 'lucide-react';
 import { db } from '../db/instant';
 
 interface InstantUser {
@@ -9,8 +9,8 @@ interface InstantUser {
 }
 
 interface NavbarProps {
-    activeTab: 'ingredients' | 'favorites';
-    onTabChange: (tab: 'ingredients' | 'favorites') => void;
+    activeTab: 'ingredients' | 'favorites' | 'square';
+    onTabChange: (tab: 'ingredients' | 'favorites' | 'square') => void;
     onOpenSettings: () => void;
     user: InstantUser | null | undefined;
 }
@@ -45,49 +45,69 @@ export default function Navbar({ activeTab, onTabChange, onOpenSettings, user }:
                     </div>
 
                     {/* Center Navigation */}
-                    <div className="flex items-center gap-1 sm:gap-4 flex-1 justify-center max-w-md">
+                    <div className="flex items-center gap-1 sm:gap-2 flex-1 justify-center max-w-lg">
                         <button
                             onClick={() => onTabChange('ingredients')}
-                            className={`flex items-center px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeTab === 'ingredients'
+                            className={`flex items-center px-3 sm:px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeTab === 'ingredients'
                                 ? 'bg-slate-900 text-white shadow-lg shadow-slate-200'
                                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                         >
-                            <Sparkles className={`w-4 h-4 mr-2 ${activeTab === 'ingredients' ? 'text-orange-400' : 'text-slate-400'}`} />
+                            <Sparkles className={`w-4 h-4 mr-1 sm:mr-2 ${activeTab === 'ingredients' ? 'text-orange-400' : 'text-slate-400'}`} />
                             <span className="hidden sm:inline">灵感生成</span>
                             <span className="sm:hidden">生成</span>
                         </button>
                         <button
                             onClick={() => onTabChange('favorites')}
-                            className={`flex items-center px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeTab === 'favorites'
+                            className={`flex items-center px-3 sm:px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeTab === 'favorites'
                                 ? 'bg-slate-900 text-white shadow-lg shadow-slate-200'
                                 : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                         >
-                            <Heart className={`w-4 h-4 mr-2 ${activeTab === 'favorites' ? 'text-rose-400' : 'text-slate-400'}`} />
+                            <Heart className={`w-4 h-4 mr-1 sm:mr-2 ${activeTab === 'favorites' ? 'text-rose-400' : 'text-slate-400'}`} />
                             <span className="hidden sm:inline">我的收藏</span>
                             <span className="sm:hidden">收藏</span>
                         </button>
+                        <button
+                            onClick={() => onTabChange('square')}
+                            className={`flex items-center px-3 sm:px-4 py-2.5 rounded-2xl text-sm font-bold transition-all duration-300 ${activeTab === 'square'
+                                ? 'bg-slate-900 text-white shadow-lg shadow-slate-200'
+                                : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                }`}
+                        >
+                            <Globe className={`w-4 h-4 mr-1 sm:mr-2 ${activeTab === 'square' ? 'text-purple-400' : 'text-slate-400'}`} />
+                            <span className="hidden sm:inline">灵感广场</span>
+                            <span className="sm:hidden">广场</span>
+                        </button>
                     </div>
 
-                    {/* Right Action - User Settings */}
+                    {/* Right Action - User Settings or Login */}
                     <div className="flex items-center">
-                        <button
-                            onClick={onOpenSettings}
-                            className="flex items-center gap-2 p-1.5 pr-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-all duration-300 group"
-                            title="用户设置"
-                        >
-                            <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden shadow-sm relative">
-                                {avatarUrl ? (
-                                    <Image src={avatarUrl} alt="Avatar" fill className="object-cover" sizes="32px" />
-                                ) : (
-                                    userInitial
-                                )}
-                            </div>
-                            <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors hidden md:block">
-                                设置
-                            </span>
-                        </button>
+                        {user ? (
+                            <button
+                                onClick={onOpenSettings}
+                                className="flex items-center gap-2 p-1.5 pr-3 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-100 transition-all duration-300 group"
+                                title="用户设置"
+                            >
+                                <div className="w-8 h-8 rounded-xl bg-orange-100 flex items-center justify-center text-orange-600 font-bold overflow-hidden shadow-sm relative">
+                                    {avatarUrl ? (
+                                        <Image src={avatarUrl} alt="Avatar" fill className="object-cover" sizes="32px" />
+                                    ) : (
+                                        userInitial
+                                    )}
+                                </div>
+                                <span className="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors hidden md:block">
+                                    设置
+                                </span>
+                            </button>
+                        ) : (
+                            <button
+                                onClick={onOpenSettings}
+                                className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all duration-300 shadow-lg shadow-slate-200"
+                            >
+                                <span className="text-sm font-bold">登录 / 注册</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

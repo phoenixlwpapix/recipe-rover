@@ -2,14 +2,16 @@
 
 import React from "react";
 import { ArrowRight, Utensils, Sparkles, Globe, Heart } from "lucide-react";
+import Image from "next/image";
 import Footer from "./Footer";
 
 
 interface LandingPageProps {
     onGetStarted: () => void;
+    onNavigateToInspiration: () => void;
 }
 
-export default function LandingPage({ onGetStarted }: LandingPageProps) {
+export default function LandingPage({ onGetStarted, onNavigateToInspiration }: LandingPageProps) {
     return (
         <div className="min-h-screen bg-white overflow-hidden">
             {/* Navigation */}
@@ -25,6 +27,12 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                             </span>
                         </div>
                         <div className="hidden md:flex items-center gap-8">
+                            <button
+                                onClick={onNavigateToInspiration}
+                                className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors"
+                            >
+                                灵感广场
+                            </button>
                             <a href="#features" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">功能特性</a>
                             <a href="#how-it-works" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">运作方式</a>
                             <button
@@ -73,25 +81,46 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                         </button>
                     </div>
 
-                    {/* Hero Image Mockup Area */}
-                    <div className="mt-20 relative max-w-5xl mx-auto">
-                        <div className="aspect-[16/9] bg-gradient-to-br from-slate-100 to-slate-200 rounded-[2.5rem] border border-slate-200 shadow-2xl overflow-hidden shadow-slate-200 group relative">
-                            <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="w-16 h-16 rounded-full bg-white/50 animate-pulse"></div>
-                                    <p className="font-medium text-slate-400">正在为您展示精美的工作界面...</p>
+
+
+                    {/* Hero Image Area */}
+                    <div className="mt-16 md:mt-24 relative max-w-5xl mx-auto perspective-1000">
+                        <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 border-[6px] border-white ring-1 ring-slate-200/50 transform transition-all duration-700 hover:scale-[1.02] hover:shadow-orange-200/50 bg-white">
+                            <Image
+                                src="/landing-hero.png"
+                                alt="Recipe Rover App Interface"
+                                width={1200}
+                                height={800}
+                                className="w-full h-auto object-cover bg-slate-50"
+                                priority
+                            />
+
+                            {/* Subtle overlay gradient for depth */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/5 to-transparent pointer-events-none" />
+                        </div>
+
+                        {/* Floating Badge - Left */}
+                        <div className="absolute -bottom-8 -left-4 md:bottom-12 md:-left-12 bg-white/90 backdrop-blur-xl p-4 md:p-5 rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 animate-bounce-slow hidden md:block">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 shadow-sm">
+                                    <Sparkles className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="text-xs text-slate-400 font-extrabold uppercase tracking-wider mb-0.5">AI Analysis</p>
+                                    <p className="text-base font-bold text-slate-800">Perfect Match!</p>
                                 </div>
                             </div>
-                            {/* Decorative UI elements inside mockup */}
-                            <div className="absolute top-8 left-8 w-48 h-64 bg-white rounded-2xl shadow-lg p-4 translate-y-12 animate-bounce-slow">
-                                <div className="w-full h-32 bg-orange-50 rounded-xl mb-4"></div>
-                                <div className="w-3/4 h-3 bg-slate-100 rounded mb-2"></div>
-                                <div className="w-1/2 h-3 bg-slate-50 rounded"></div>
-                            </div>
-                            <div className="absolute top-12 right-12 w-56 h-72 bg-white rounded-2xl shadow-xl p-4 -translate-y-8">
-                                <div className="w-full h-40 bg-indigo-50 rounded-xl mb-4"></div>
-                                <div className="w-2/3 h-4 bg-slate-100 rounded mb-2"></div>
-                                <div className="w-4/5 h-4 bg-slate-50 rounded"></div>
+                        </div>
+
+                        {/* Floating Badge - Right */}
+                        <div className="absolute top-12 -right-4 md:top-20 md:-right-8 bg-white/90 backdrop-blur-xl p-4 rounded-3xl shadow-xl shadow-slate-200/50 border border-white/60 animate-bounce-slow hidden md:block" style={{ animationDelay: '1s' }}>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600">
+                                    <Heart className="w-5 h-5 fill-orange-600" />
+                                </div>
+                                <div className="pr-2">
+                                    <p className="text-sm font-bold text-slate-800">Saved to Favorites</p>
+                                </div>
                             </div>
                         </div>
                     </div>

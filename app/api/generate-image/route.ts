@@ -11,7 +11,7 @@ const IMAGE_MODEL = "gemini-2.5-flash-image";
  */
 export async function POST(request: NextRequest) {
     try {
-        const { title } = await request.json();
+        const { title, ingredients, instructions } = await request.json();
 
         if (!title) {
             return NextResponse.json(
@@ -20,7 +20,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const imagePrompt = `A delicious ${title} dish, professional food photography, appetizing presentation, warm lighting, high quality, 4K`;
+        const ingredientsText = Array.isArray(ingredients) ? ingredients.join(", ") : ingredients || "";
+        const instructionsContext = instructions ? instructions.slice(0, 200).replace(/\n/g, " ") : "";
+
+        // Constructed prompt based on user requirements and Michelin style guide
+        const imagePrompt = `
+Subject: ${title}.
+Key Ingredients: ${ingredientsText}.
+Cooking Context: ${instructionsContext}.
+
+Style Description: Top-down flat lay of a Michelin-star fine dining main course, high-end commercial aesthetic, dish centered with balanced composition and generous negative space. Core ingredients delicately scattered around the plate, intentional yet organically arranged. Premium ceramic or matte stoneware plate, low-saturation color palette emphasizing texture and refinement. Soft directional overhead lighting creating subtle shadows to enhance form and detail. Background in dark luxury tones (charcoal, deep gray, dark walnut wood). Calm, elegant, professional mood suitable for luxury restaurant menus and Michelin-level visual branding, ultra-high resolution, photorealistic food photography.
+`.trim();
 
         const response = await ai.models.generateContent({
             model: IMAGE_MODEL,

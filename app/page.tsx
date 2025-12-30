@@ -10,17 +10,19 @@ import RecipeSkeleton from "../components/RecipeSkeleton";
 import IngredientsPanel from "../components/IngredientsPanel";
 import Navbar from "../components/Navbar";
 import FavoritesGrid from "../components/FavoritesGrid";
+import InspirationSquare from "../components/InspirationSquare";
 import ConfirmModal from "../components/ConfirmModal";
 import SettingsModal from "../components/SettingsModal";
 import Toast from "../components/Toast";
 import { parseRecipe } from "../utils/recipeParser";
 import { base64ToFile } from "../utils/imageUtils";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ShareIcon } from "@heroicons/react/24/outline";
 import Footer from "../components/Footer";
+import GuestInspirationView from "../components/GuestInspirationView";
 
 
-function SignedInContent() {
-  const [activeTab, setActiveTab] = useState<"ingredients" | "favorites">("ingredients");
+function AppContent() {
+  const [activeTab, setActiveTab] = useState<"ingredients" | "favorites" | "square">("ingredients");
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [recipe, setRecipe] = useState("");
   const [recipeImage, setRecipeImage] = useState<string | undefined>();
@@ -29,7 +31,18 @@ function SignedInContent() {
   // States for Favorites View
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const [selectedRecipeRecipeId, setSelectedRecipeRecipeId] = useState<string | null>(null);
   const [selectedRecipeCuisine, setSelectedRecipeCuisine] = useState<string | undefined>(undefined);
+  const [selectedRecipeIsShared, setSelectedRecipeIsShared] = useState<boolean>(false);
+  const [selectedRecipeShareId, setSelectedRecipeShareId] = useState<string | undefined>(undefined);
+
+  // States for Inspiration Square
+  const [squareSelectedRecipe, setSquareSelectedRecipe] = useState<string | null>(null);
+  const [squareSelectedId, setSquareSelectedId] = useState<string | null>(null);
+  const [squareRecipeImage, setSquareRecipeImage] = useState<string | undefined>(undefined);
+  const [squareRecipeCuisine, setSquareRecipeCuisine] = useState<string | undefined>(undefined);
+  const [squareSharerEmail, setSquareSharerEmail] = useState<string | undefined>(undefined);
+  const [squareIsOwnShare, setSquareIsOwnShare] = useState<boolean>(false);
 
   // Common Loading States
   const [loading, setLoading] = useState(false);
@@ -68,7 +81,7 @@ function SignedInContent() {
 
   const { data: ingredientsData } = db.useQuery({
     ingredients: {
-      $: { where: { userId: user?.id } },
+      $: { where: { userId: user?.id || "guest" } },
     },
   });
 
@@ -177,10 +190,22 @@ function SignedInContent() {
 
         // 异步生成图片
         const parsedRecipe = parseRecipe(data.recipe);
+
+        // Extract top 5 ingredients
+        const topIngredients = parsedRecipe.ingredients
+          .split('\n')
+          .filter(line => line.trim().match(/^[-*•]|\d+\./))
+          .slice(0, 5)
+          .map(line => line.replace(/^[-*•]|\d+\.\s*/, '').trim());
+
         fetch("/api/generate-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title: parsedRecipe.title }),
+          body: JSON.stringify({
+            title: parsedRecipe.title,
+            ingredients: topIngredients,
+            instructions: parsedRecipe.instructions
+          }),
         })
           .then((imgRes) => imgRes.json())
           .then((imgData) => {
@@ -311,26 +336,125 @@ function SignedInContent() {
   const handleFavoriteClick = (
     recipeText: string,
     favoriteId: string,
+    recipeId: string,
     image?: string,
-    cuisine?: string
+    cuisine?: string,
+    isShared?: boolean,
+    shareId?: string
   ) => {
     setSelectedRecipe(recipeText);
     setSelectedRecipeId(favoriteId);
+    setSelectedRecipeRecipeId(recipeId);
     setRecipeImage(image);
     setSelectedRecipeCuisine(cuisine);
-
-
+    setSelectedRecipeIsShared(isShared || false);
+    setSelectedRecipeShareId(shareId);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Handler for clicking a recipe in the Inspiration Square
+  const handleSquareRecipeClick = (
+    recipeText: string,
+    sharedId: string,
+    image?: string,
+    cuisine?: string,
+    sharerEmail?: string,
+    isOwn?: boolean
+  ) => {
+    setSquareSelectedRecipe(recipeText);
+    setSquareSelectedId(sharedId);
+    setSquareRecipeImage(image);
+    setSquareRecipeCuisine(cuisine);
+    setSquareSharerEmail(sharerEmail);
+    setSquareIsOwnShare(isOwn || false);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Share a favorite recipe to the Inspiration Square
+  const shareToSquare = async (recipeId: string) => {
+    if (!user?.id) {
+      setToast({ isOpen: true, type: "error", title: "请先登录", message: "登录后才能分享食谱" });
+      return;
+    }
+
+    setToast({ isOpen: true, type: "loading", title: "正在分享...", message: "请稍候" });
+
+    try {
+      const sharedRecipeId = id();
+      await db.transact([
+        db.tx.sharedRecipes[sharedRecipeId].update({
+          sharedAt: Date.now(),
+        }),
+        db.tx.sharedRecipes[sharedRecipeId].link({ recipe: recipeId }),
+        db.tx.sharedRecipes[sharedRecipeId].link({ user: user.id }),
+      ]);
+
+      // Update local state if we're in favorites detail view
+      setSelectedRecipeIsShared(true);
+      setSelectedRecipeShareId(sharedRecipeId);
+
+      setToast({ isOpen: true, type: "success", title: "分享成功！", message: "食谱已发布到灵感广场" });
+    } catch (error) {
+      console.error("分享失败:", error);
+      setToast({ isOpen: true, type: "error", title: "分享失败", message: "请重试" });
+    }
+  };
+
+  // Unshare a recipe from the Inspiration Square
+  const unshareFromSquare = async (shareId: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "取消分享",
+      message: "确定要将这个食谱从灵感广场撤下吗？其他用户将无法再看到它。",
+      onConfirm: async () => {
+        try {
+          await db.transact([db.tx.sharedRecipes[shareId].delete()]);
+
+          // Update local state
+          setSelectedRecipeIsShared(false);
+          setSelectedRecipeShareId(undefined);
+
+          // If we're in the square view, go back to grid
+          if (squareSelectedId === shareId) {
+            setSquareSelectedRecipe(null);
+            setSquareSelectedId(null);
+          }
+
+          setConfirmModal({
+            isOpen: false,
+            title: "",
+            message: "",
+            onConfirm: () => { },
+          });
+          setToast({ isOpen: true, type: "success", title: "已取消分享", message: "食谱已从广场撤下" });
+        } catch (error) {
+          console.error("取消分享失败:", error);
+          setToast({ isOpen: true, type: "error", title: "取消分享失败", message: "请重试" });
+          setConfirmModal({
+            isOpen: false,
+            title: "",
+            message: "",
+            onConfirm: () => { },
+          });
+        }
+      },
+    });
   };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
       <Navbar
         activeTab={activeTab}
-        onTabChange={(tab: 'ingredients' | 'favorites') => {
+        onTabChange={(tab: 'ingredients' | 'favorites' | 'square') => {
           setActiveTab(tab);
           if (tab === 'ingredients') {
+            setSelectedRecipe(null);
+            setSquareSelectedRecipe(null);
+          } else if (tab === 'favorites') {
+            setSquareSelectedRecipe(null);
+          } else if (tab === 'square') {
             setSelectedRecipe(null);
           }
         }}
@@ -529,6 +653,11 @@ function SignedInContent() {
                   image={recipeImage}
                   onDeleteFavorite={deleteFavorite}
                   favoriteId={selectedRecipeId || undefined}
+                  recipeId={selectedRecipeRecipeId || undefined}
+                  onShareToSquare={selectedRecipeIsShared ? undefined : shareToSquare}
+                  onUnshare={selectedRecipeIsShared ? unshareFromSquare : undefined}
+                  shareId={selectedRecipeShareId}
+                  isShared={selectedRecipeIsShared}
                   cuisine={selectedRecipeCuisine}
                 />
               </div>
@@ -543,6 +672,57 @@ function SignedInContent() {
                   userId={user?.id || ""}
                   onRecipeClick={handleFavoriteClick}
                   onDeleteFavorite={deleteFavorite}
+                  onShareToSquare={shareToSquare}
+                  onUnshare={unshareFromSquare}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Inspiration Square Tab */}
+        {activeTab === "square" && (
+          <div className="space-y-6">
+            {squareSelectedRecipe ? (
+              // Detail View
+              <div className="animate-slide-in">
+                <button
+                  onClick={() => setSquareSelectedRecipe(null)}
+                  className="flex items-center text-slate-500 hover:text-slate-800 transition-colors mb-6 group font-medium"
+                >
+                  <div className="p-2 rounded-full bg-white border border-slate-200 mr-3 group-hover:border-slate-400 transition-colors shadow-sm">
+                    <ArrowLeftIcon className="w-5 h-5" />
+                  </div>
+                  返回灵感广场
+                </button>
+                {squareSharerEmail && (
+                  <div className="mb-4 inline-flex items-center gap-2 text-sm text-purple-600 bg-purple-50 px-4 py-2 rounded-full font-medium">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    来自 {squareSharerEmail.split('@')[0]} 的分享
+                  </div>
+                )}
+                <RecipeDisplay
+                  recipe={squareSelectedRecipe}
+                  image={squareRecipeImage}
+                  cuisine={squareRecipeCuisine}
+                  onUnshare={squareIsOwnShare ? unshareFromSquare : undefined}
+                  shareId={squareSelectedId || undefined}
+                  isShared={true}
+                />
+              </div>
+            ) : (
+              // Grid View
+              <div className="animate-fadeIn">
+                <div className="mb-8">
+                  <h2 className="text-3xl font-bold text-slate-800 mb-2">灵感广场</h2>
+                  <p className="text-slate-500">发现来自社区的美味灵感</p>
+                </div>
+                <InspirationSquare
+                  userId={user?.id}
+                  onRecipeClick={handleSquareRecipeClick}
+                  onUnshare={unshareFromSquare}
                 />
               </div>
             )}
@@ -580,27 +760,41 @@ function SignedInContent() {
         user={user}
         onLogout={() => db.auth.signOut()}
       />
-      <Footer />
+      <Footer onNavigate={(tab) => {
+        setActiveTab(tab);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }} />
     </div>
 
   );
 }
 
+
 export default function Home() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showGuestApp, setShowGuestApp] = useState(false);
 
   return (
     <main className="min-h-screen bg-slate-50">
       <db.SignedIn>
-        <SignedInContent />
+        <AppContent />
       </db.SignedIn>
       <db.SignedOut>
         {showLogin ? (
           <Login onBack={() => setShowLogin(false)} />
+        ) : showGuestApp ? (
+          <GuestInspirationView
+            onLogin={() => setShowLogin(true)}
+            onBack={() => setShowGuestApp(false)}
+          />
         ) : (
-          <LandingPage onGetStarted={() => setShowLogin(true)} />
+          <LandingPage
+            onGetStarted={() => setShowLogin(true)}
+            onNavigateToInspiration={() => setShowGuestApp(true)}
+          />
         )}
       </db.SignedOut>
     </main>
   );
 }
+

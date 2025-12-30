@@ -2,29 +2,39 @@
 import React from 'react';
 import Image from 'next/image';
 import { db } from '../db/instant';
-import { TrashIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { TrashIcon, ClockIcon, ShareIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 interface FavoritesGridProps {
     userId: string;
     onRecipeClick: (
         recipeText: string,
         favoriteId: string,
+        recipeId: string,
         image?: string,
-        cuisine?: string
+        cuisine?: string,
+        isShared?: boolean,
+        shareId?: string
     ) => void;
     onDeleteFavorite: (favoriteId: string) => void;
+    onShareToSquare?: (recipeId: string) => void;
+    onUnshare?: (shareId: string) => void;
 }
 
 export default function FavoritesGrid({
     userId,
     onRecipeClick,
     onDeleteFavorite,
+    onShareToSquare,
+    onUnshare,
 }: FavoritesGridProps) {
     const { data, isLoading, error } = db.useQuery({
         favorites: {
             $: { where: { "user.id": userId } },
             recipe: {
                 $file: {},
+                shares: {
+                    user: {},
+                },
             },
         },
     });
@@ -67,6 +77,11 @@ export default function FavoritesGrid({
                 const cuisine = fav.recipe?.cuisine;
                 const date = fav.createdAt ? new Date(fav.createdAt).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' }) : '';
 
+                // Check if this recipe is shared (find share by current user)
+                const userShare = fav.recipe?.shares?.find((share: { user?: { id?: string } }) => share.user?.id === userId);
+                const isShared = !!userShare;
+                const shareId = userShare?.id;
+
                 return (
                     <div
                         key={fav.id}
@@ -77,7 +92,7 @@ export default function FavoritesGrid({
                                 }\n**步骤:**\n${fav.recipe?.instructions || ''}${fav.recipe?.tips ? `\n**小贴士:**\n${fav.recipe.tips}` : ""
                                 }`;
 
-                            onRecipeClick(recipeText, fav.id, imageUrl, cuisine);
+                            onRecipeClick(recipeText, fav.id, fav.recipe?.id || '', imageUrl, cuisine, isShared, shareId);
                         }}
                         className="group relative bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 overflow-hidden cursor-pointer border border-slate-100 flex flex-col h-full transform hover:-translate-y-2"
                     >
@@ -109,6 +124,14 @@ export default function FavoritesGrid({
                                     {cuisine}
                                 </div>
                             )}
+
+                            {/* Shared Badge */}
+                            {isShared && (
+                                <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-purple-500/90 backdrop-blur-sm text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                                    <GlobeAltIcon className="w-3.5 h-3.5" />
+                                    已分享
+                                </div>
+                            )}
                         </div>
 
                         {/* Content Section */}
@@ -132,17 +155,52 @@ export default function FavoritesGrid({
                             </div>
                         </div>
 
-                        {/* Delete Button */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteFavorite(fav.id);
-                            }}
-                            className="absolute top-4 right-4 p-2.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10 border border-slate-100"
-                            title="删除收藏"
-                        >
-                            <TrashIcon className="w-4 h-4" />
-                        </button>
+                        {/* Action Buttons */}
+                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+                            {/* Share/Unshare Button */}
+                            {isShared ? (
+                                // Unshare button
+                                onUnshare && shareId && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            onUnshare(shareId);
+                                        }}
+                                        className="p-2.5 bg-purple-500/90 backdrop-blur-md text-white hover:bg-purple-600 rounded-2xl shadow-xl transition-all duration-300 hover:scale-110 border border-purple-400"
+                                        title="取消分享"
+                                    >
+                                        <GlobeAltIcon className="w-4 h-4" />
+                                    </button>
+                                )
+                            ) : (
+                                // Share button
+                                onShareToSquare && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (fav.recipe?.id) {
+                                                onShareToSquare(fav.recipe.id);
+                                            }
+                                        }}
+                                        className="p-2.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-purple-500 hover:bg-purple-50 rounded-2xl shadow-xl transition-all duration-300 hover:scale-110 border border-slate-100"
+                                        title="分享到广场"
+                                    >
+                                        <ShareIcon className="w-4 h-4" />
+                                    </button>
+                                )
+                            )}
+                            {/* Delete Button */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteFavorite(fav.id);
+                                }}
+                                className="p-2.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl shadow-xl transition-all duration-300 hover:scale-110 border border-slate-100"
+                                title="删除收藏"
+                            >
+                                <TrashIcon className="w-4 h-4" />
+                            </button>
+                        </div>
                     </div>
                 );
             })}

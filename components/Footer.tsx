@@ -3,7 +3,11 @@
 import React from "react";
 import { Utensils, Github, Twitter, Instagram, Mail, Heart } from "lucide-react";
 
-export default function Footer() {
+interface FooterProps {
+    onNavigate?: (tab: 'ingredients' | 'favorites' | 'square') => void;
+}
+
+export default function Footer({ onNavigate }: FooterProps) {
     return (
         <footer className="bg-white border-t border-slate-100 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,9 +42,30 @@ export default function Footer() {
                     <div>
                         <h3 className="text-slate-900 font-bold mb-6 text-sm uppercase tracking-wider">产品</h3>
                         <ul className="space-y-4">
-                            <li><a href="#" className="text-slate-500 hover:text-orange-600 transition-colors text-sm">生成食谱</a></li>
-                            <li><a href="#" className="text-slate-500 hover:text-orange-600 transition-colors text-sm">灵感广场</a></li>
-                            <li><a href="#" className="text-slate-500 hover:text-orange-600 transition-colors text-sm">我的收藏</a></li>
+                            <li>
+                                <button
+                                    onClick={() => onNavigate?.('ingredients')}
+                                    className="text-slate-500 hover:text-orange-600 transition-colors text-sm text-left"
+                                >
+                                    生成食谱
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => onNavigate?.('square')}
+                                    className="text-slate-500 hover:text-orange-600 transition-colors text-sm text-left"
+                                >
+                                    灵感广场
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => onNavigate?.('favorites')}
+                                    className="text-slate-500 hover:text-orange-600 transition-colors text-sm text-left"
+                                >
+                                    我的收藏
+                                </button>
+                            </li>
                             <li><a href="#" className="text-slate-500 hover:text-orange-600 transition-colors text-sm">高级会员</a></li>
                         </ul>
                     </div>
