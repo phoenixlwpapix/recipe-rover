@@ -28,6 +28,12 @@ function AppContent() {
   const [recipeImage, setRecipeImage] = useState<string | undefined>();
   const [imageLoading, setImageLoading] = useState(false);
 
+  // States for generated recipe after saving
+  const [generatedRecipeFavoriteId, setGeneratedRecipeFavoriteId] = useState<string | null>(null);
+  const [generatedRecipeRecipeId, setGeneratedRecipeRecipeId] = useState<string | null>(null);
+  const [generatedRecipeIsShared, setGeneratedRecipeIsShared] = useState(false);
+  const [generatedRecipeShareId, setGeneratedRecipeShareId] = useState<string | undefined>(undefined);
+
   // States for Favorites View
   const [selectedRecipe, setSelectedRecipe] = useState<string | null>(null);
   const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
@@ -174,6 +180,11 @@ function AppContent() {
         setRecipe(data.recipe);
         setRecipeImage(undefined); // 清除旧图片
         setImageLoading(true); // 开始加载图片
+        // 重置收藏状态
+        setGeneratedRecipeFavoriteId(null);
+        setGeneratedRecipeRecipeId(null);
+        setGeneratedRecipeIsShared(false);
+        setGeneratedRecipeShareId(undefined);
 
         // Scroll to recipe section after generation
         setTimeout(() => {
@@ -289,6 +300,9 @@ function AppContent() {
         }
       }
 
+      // 更新生成菜谱的收藏状态
+      setGeneratedRecipeFavoriteId(favoriteId);
+      setGeneratedRecipeRecipeId(recipeId);
       setToast({ isOpen: true, type: "success", title: "收藏成功！", message: "食谱已添加到收藏夹" });
     } catch (error) {
       console.error("收藏失败:", error);
@@ -296,19 +310,35 @@ function AppContent() {
     }
   };
 
-  const deleteFavorite = async (favoriteId: string) => {
+  const deleteFavorite = async (favoriteId: string, shareId?: string) => {
     setConfirmModal({
       isOpen: true,
       title: "删除收藏",
-      message: "确定要删除这个收藏的食谱吗？此操作无法撤销。",
+      message: shareId
+        ? "确定要删除这个收藏的食谱吗？该食谱也会从灵感广场撤下。此操作无法撤销。"
+        : "确定要删除这个收藏的食谱吗？此操作无法撤销。",
       onConfirm: async () => {
         try {
+          // Delete favorite record
           await db.transact([db.tx.favorites[favoriteId].delete()]);
+
+          // Also delete share record if exists
+          if (shareId) {
+            await db.transact([db.tx.sharedRecipes[shareId].delete()]);
+          }
 
           // If we were viewing this recipe, go back to grid
           if (selectedRecipeId === favoriteId) {
             setSelectedRecipe(null);
             setSelectedRecipeId(null);
+          }
+
+          // Reset generated recipe favorite state if applicable
+          if (generatedRecipeFavoriteId === favoriteId) {
+            setGeneratedRecipeFavoriteId(null);
+            setGeneratedRecipeRecipeId(null);
+            setGeneratedRecipeIsShared(false);
+            setGeneratedRecipeShareId(undefined);
           }
 
           setConfirmModal({
@@ -395,6 +425,12 @@ function AppContent() {
       setSelectedRecipeIsShared(true);
       setSelectedRecipeShareId(sharedRecipeId);
 
+      // Update local state if we're in ingredients tab with generated recipe
+      if (generatedRecipeRecipeId === recipeId) {
+        setGeneratedRecipeIsShared(true);
+        setGeneratedRecipeShareId(sharedRecipeId);
+      }
+
       setToast({ isOpen: true, type: "success", title: "分享成功！", message: "食谱已发布到灵感广场" });
     } catch (error) {
       console.error("分享失败:", error);
@@ -415,6 +451,12 @@ function AppContent() {
           // Update local state
           setSelectedRecipeIsShared(false);
           setSelectedRecipeShareId(undefined);
+
+          // Update generated recipe share state if applicable
+          if (generatedRecipeShareId === shareId) {
+            setGeneratedRecipeIsShared(false);
+            setGeneratedRecipeShareId(undefined);
+          }
 
           // If we're in the square view, go back to grid
           if (squareSelectedId === shareId) {
@@ -625,7 +667,14 @@ function AppContent() {
                   recipe={recipe}
                   image={recipeImage}
                   imageLoading={imageLoading}
-                  onAddToFavorites={addToFavorites}
+                  onAddToFavorites={generatedRecipeFavoriteId ? undefined : addToFavorites}
+                  onDeleteFavorite={generatedRecipeFavoriteId ? deleteFavorite : undefined}
+                  favoriteId={generatedRecipeFavoriteId || undefined}
+                  recipeId={generatedRecipeRecipeId || undefined}
+                  onShareToSquare={generatedRecipeFavoriteId && !generatedRecipeIsShared ? shareToSquare : undefined}
+                  onUnshare={generatedRecipeIsShared ? unshareFromSquare : undefined}
+                  shareId={generatedRecipeShareId}
+                  isShared={generatedRecipeIsShared}
                   cuisine={selectedCuisine}
                 />
               </div>

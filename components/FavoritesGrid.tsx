@@ -15,7 +15,7 @@ interface FavoritesGridProps {
         isShared?: boolean,
         shareId?: string
     ) => void;
-    onDeleteFavorite: (favoriteId: string) => void;
+    onDeleteFavorite: (favoriteId: string, shareId?: string) => void;
     onShareToSquare?: (recipeId: string) => void;
     onUnshare?: (shareId: string) => void;
 }
@@ -193,7 +193,7 @@ export default function FavoritesGrid({
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onDeleteFavorite(fav.id);
+                                    onDeleteFavorite(fav.id, shareId);
                                 }}
                                 className="p-2.5 bg-white/90 backdrop-blur-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-2xl shadow-xl transition-all duration-300 hover:scale-110 border border-slate-100"
                                 title="删除收藏"

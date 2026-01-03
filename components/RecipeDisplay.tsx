@@ -18,7 +18,7 @@ interface RecipeDisplayProps {
   recipe: string;
   image?: string;
   imageLoading?: boolean;
-  onDeleteFavorite?: (favoriteId: string) => void;
+  onDeleteFavorite?: (favoriteId: string, shareId?: string) => void;
   favoriteId?: string;
   recipeId?: string;
   onAddToFavorites?: () => void;
@@ -248,7 +248,7 @@ function RecipeDisplay({
           )}
           {onDeleteFavorite && favoriteId && (
             <button
-              onClick={() => onDeleteFavorite(favoriteId)}
+              onClick={() => onDeleteFavorite(favoriteId, shareId)}
               className="inline-flex items-center px-10 py-4 bg-white text-rose-600 border-2 border-rose-50 font-bold rounded-2xl hover:bg-rose-50 hover:border-rose-100 transition-all duration-300"
             >
               <TrashIcon className="w-6 h-6 mr-3" />
